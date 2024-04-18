@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol FeedListRouting {
+protocol FeedListRouting: Alertable {
     var viewController: FeedListViewController? { get set }
 }
 

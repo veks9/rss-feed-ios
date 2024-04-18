@@ -10,6 +10,8 @@ import UIKit
 enum Assets: String {
     
     case plus
+    case star
+    case starFill = "star.fill"
     
     var image: UIImage? {
         UIImage(named: rawValue)

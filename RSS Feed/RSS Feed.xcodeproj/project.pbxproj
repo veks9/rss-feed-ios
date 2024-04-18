@@ -24,11 +24,9 @@
 		71A2B89B2BD174FE0017B375 /* UICollectionView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8862BD174FE0017B375 /* UICollectionView+.swift */; };
 		71A2B89F2BD174FE0017B375 /* Int+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B88B2BD174FE0017B375 /* Int+.swift */; };
 		71A2B8A02BD174FE0017B375 /* Collection+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B88C2BD174FE0017B375 /* Collection+.swift */; };
-		71A2B8A12BD174FE0017B375 /* Encodable+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B88D2BD174FE0017B375 /* Encodable+.swift */; };
 		71A2B8A22BD174FE0017B375 /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B88E2BD174FE0017B375 /* String+.swift */; };
 		71A2B8A32BD174FE0017B375 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B88F2BD174FE0017B375 /* Double+.swift */; };
 		71A2B8A42BD174FE0017B375 /* Optional+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8902BD174FE0017B375 /* Optional+.swift */; };
-		71A2B8A52BD174FE0017B375 /* Decodable+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8912BD174FE0017B375 /* Decodable+.swift */; };
 		71A2B8A62BD174FE0017B375 /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8922BD174FE0017B375 /* String+Localization.swift */; };
 		71A2B8AC2BD175B00017B375 /* FeedListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8A82BD175B00017B375 /* FeedListRouter.swift */; };
 		71A2B8AD2BD175B00017B375 /* FeedListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8A92BD175B00017B375 /* FeedListViewController.swift */; };
@@ -37,6 +35,10 @@
 		71A2B8B52BD177370017B375 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 71A2B8B42BD177370017B375 /* SnapKit */; };
 		71A2B8B82BD177640017B375 /* CombineCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 71A2B8B72BD177640017B375 /* CombineCocoa */; };
 		71A2B8BB2BD177890017B375 /* CombineExt in Frameworks */ = {isa = PBXBuildFile; productRef = 71A2B8BA2BD177890017B375 /* CombineExt */; };
+		71A2B8C32BD17D310017B375 /* Alertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8BE2BD17D310017B375 /* Alertable.swift */; };
+		71A2B8C42BD17D310017B375 /* AlertActionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8C02BD17D310017B375 /* AlertActionViewModel.swift */; };
+		71A2B8C52BD17D310017B375 /* AlertViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8C22BD17D310017B375 /* AlertViewModel.swift */; };
+		71A2B8C72BD17D740017B375 /* UIApplication+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8C62BD17D740017B375 /* UIApplication+.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,15 +61,17 @@
 		71A2B8862BD174FE0017B375 /* UICollectionView+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UICollectionView+.swift"; sourceTree = "<group>"; };
 		71A2B88B2BD174FE0017B375 /* Int+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Int+.swift"; sourceTree = "<group>"; };
 		71A2B88C2BD174FE0017B375 /* Collection+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Collection+.swift"; sourceTree = "<group>"; };
-		71A2B88D2BD174FE0017B375 /* Encodable+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Encodable+.swift"; sourceTree = "<group>"; };
 		71A2B88E2BD174FE0017B375 /* String+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
 		71A2B88F2BD174FE0017B375 /* Double+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
 		71A2B8902BD174FE0017B375 /* Optional+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Optional+.swift"; sourceTree = "<group>"; };
-		71A2B8912BD174FE0017B375 /* Decodable+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Decodable+.swift"; sourceTree = "<group>"; };
 		71A2B8922BD174FE0017B375 /* String+Localization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		71A2B8A82BD175B00017B375 /* FeedListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListRouter.swift; sourceTree = "<group>"; };
 		71A2B8A92BD175B00017B375 /* FeedListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewController.swift; sourceTree = "<group>"; };
 		71A2B8AB2BD175B00017B375 /* FeedListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewModel.swift; sourceTree = "<group>"; };
+		71A2B8BE2BD17D310017B375 /* Alertable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alertable.swift; sourceTree = "<group>"; };
+		71A2B8C02BD17D310017B375 /* AlertActionViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertActionViewModel.swift; sourceTree = "<group>"; };
+		71A2B8C22BD17D310017B375 /* AlertViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertViewModel.swift; sourceTree = "<group>"; };
+		71A2B8C62BD17D740017B375 /* UIApplication+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +108,7 @@
 		71A2B8542BD172A60017B375 /* RSS Feed */ = {
 			isa = PBXGroup;
 			children = (
+				71A2B8BC2BD17D280017B375 /* Common */,
 				71A2B87B2BD174FE0017B375 /* Extensions */,
 				71A2B86A2BD1731C0017B375 /* Modules */,
 				71A2B8692BD172CC0017B375 /* Resources */,
@@ -170,6 +175,7 @@
 				71A2B8842BD174FE0017B375 /* UIImageView+.swift */,
 				71A2B8852BD174FE0017B375 /* UILabel+.swift */,
 				71A2B8862BD174FE0017B375 /* UICollectionView+.swift */,
+				71A2B8C62BD17D740017B375 /* UIApplication+.swift */,
 			);
 			path = UIKit;
 			sourceTree = "<group>";
@@ -179,11 +185,9 @@
 			children = (
 				71A2B88B2BD174FE0017B375 /* Int+.swift */,
 				71A2B88C2BD174FE0017B375 /* Collection+.swift */,
-				71A2B88D2BD174FE0017B375 /* Encodable+.swift */,
 				71A2B88E2BD174FE0017B375 /* String+.swift */,
 				71A2B88F2BD174FE0017B375 /* Double+.swift */,
 				71A2B8902BD174FE0017B375 /* Optional+.swift */,
-				71A2B8912BD174FE0017B375 /* Decodable+.swift */,
 				71A2B8922BD174FE0017B375 /* String+Localization.swift */,
 			);
 			path = Foundation;
@@ -197,6 +201,40 @@
 				71A2B8AB2BD175B00017B375 /* FeedListViewModel.swift */,
 			);
 			path = FeedList;
+			sourceTree = "<group>";
+		};
+		71A2B8BC2BD17D280017B375 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8BD2BD17D310017B375 /* Alerts */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		71A2B8BD2BD17D310017B375 /* Alerts */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8BE2BD17D310017B375 /* Alertable.swift */,
+				71A2B8BF2BD17D310017B375 /* AlertActionViewModel */,
+				71A2B8C12BD17D310017B375 /* AlertViewModel */,
+			);
+			path = Alerts;
+			sourceTree = "<group>";
+		};
+		71A2B8BF2BD17D310017B375 /* AlertActionViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8C02BD17D310017B375 /* AlertActionViewModel.swift */,
+			);
+			path = AlertActionViewModel;
+			sourceTree = "<group>";
+		};
+		71A2B8C12BD17D310017B375 /* AlertViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8C22BD17D310017B375 /* AlertViewModel.swift */,
+			);
+			path = AlertViewModel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -283,19 +321,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				71A2B8992BD174FE0017B375 /* UIImageView+.swift in Sources */,
+				71A2B8C42BD17D310017B375 /* AlertActionViewModel.swift in Sources */,
 				71A2B8972BD174FE0017B375 /* UIEdgeInsets+.swift in Sources */,
+				71A2B8C52BD17D310017B375 /* AlertViewModel.swift in Sources */,
 				71A2B86D2BD1732F0017B375 /* AppRootViewController.swift in Sources */,
+				71A2B8C72BD17D740017B375 /* UIApplication+.swift in Sources */,
 				71A2B89A2BD174FE0017B375 /* UILabel+.swift in Sources */,
 				71A2B8A32BD174FE0017B375 /* Double+.swift in Sources */,
 				71A2B8AD2BD175B00017B375 /* FeedListViewController.swift in Sources */,
 				71A2B8A42BD174FE0017B375 /* Optional+.swift in Sources */,
 				71A2B8962BD174FE0017B375 /* UIFont+.swift in Sources */,
+				71A2B8C32BD17D310017B375 /* Alertable.swift in Sources */,
 				71A2B89F2BD174FE0017B375 /* Int+.swift in Sources */,
-				71A2B8A12BD174FE0017B375 /* Encodable+.swift in Sources */,
 				71A2B86F2BD173360017B375 /* AppRootViewModel.swift in Sources */,
 				71A2B8942BD174FE0017B375 /* DateFormatter+.swift in Sources */,
 				71A2B8A02BD174FE0017B375 /* Collection+.swift in Sources */,
-				71A2B8A52BD174FE0017B375 /* Decodable+.swift in Sources */,
 				71A2B8782BD1745A0017B375 /* Assets.swift in Sources */,
 				71A2B8A62BD174FE0017B375 /* String+Localization.swift in Sources */,
 				71A2B8AC2BD175B00017B375 /* FeedListRouter.swift in Sources */,
