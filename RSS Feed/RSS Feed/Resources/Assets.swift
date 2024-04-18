@@ -1,0 +1,21 @@
+//
+//  Assets.swift
+//  RSS Feed
+//
+//  Created by Vedran Hernaus on 18.04.2024..
+//
+
+import UIKit
+
+enum Assets: String {
+    
+    case plus
+    
+    var image: UIImage? {
+        UIImage(named: rawValue)
+    }
+    
+    var systemImage: UIImage? {
+        UIImage(systemName: rawValue)
+    }
+}
