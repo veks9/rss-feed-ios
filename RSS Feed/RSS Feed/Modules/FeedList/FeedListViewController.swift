@@ -37,7 +37,6 @@ final class FeedListViewController: UIViewController {
     }
     
     private func styleView() {
-        
     }
     
     private func addSubviews() {

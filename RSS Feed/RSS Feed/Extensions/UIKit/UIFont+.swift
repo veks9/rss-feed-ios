@@ -9,12 +9,12 @@ import UIKit
 
 extension UIFont {
     static func appFont(with size: CGFloat, weight: Weight = .regular) -> UIFont {
-        UIFont(name: "SFProDisplay-\(weightString)", size: size) ?? UIFont.systemFont(ofSize: size, weight: weight)
+        UIFont(name: "SFProDisplay-\(weight.weightString)", size: size) ?? UIFont.systemFont(ofSize: size, weight: weight)
     }
 }
 
 private extension UIFont.Weight {
-    var weight: String {
+    var weightString: String {
         switch self {
         case .regular:
             return "Regular"
