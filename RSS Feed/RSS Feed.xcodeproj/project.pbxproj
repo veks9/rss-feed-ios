@@ -55,6 +55,8 @@
 		71A2B8EC2BD3E3410017B375 /* FeedItemsListCellType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8EB2BD3E3410017B375 /* FeedItemsListCellType.swift */; };
 		71A2B8EE2BD3E3480017B375 /* FeedItemsListSectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8ED2BD3E3480017B375 /* FeedItemsListSectionType.swift */; };
 		71A2B8F02BD3E34E0017B375 /* FeedItemsListSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8EF2BD3E34E0017B375 /* FeedItemsListSection.swift */; };
+		71A2B8F32BD3F84E0017B375 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 71A2B8F22BD3F84E0017B375 /* FeedKit */; };
+		71A2B8F62BD416AC0017B375 /* RSSParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8F52BD416AC0017B375 /* RSSParser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -104,6 +106,7 @@
 		71A2B8EB2BD3E3410017B375 /* FeedItemsListCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListCellType.swift; sourceTree = "<group>"; };
 		71A2B8ED2BD3E3480017B375 /* FeedItemsListSectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListSectionType.swift; sourceTree = "<group>"; };
 		71A2B8EF2BD3E34E0017B375 /* FeedItemsListSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListSection.swift; sourceTree = "<group>"; };
+		71A2B8F52BD416AC0017B375 /* RSSParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +115,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				71A2B8BB2BD177890017B375 /* CombineExt in Frameworks */,
+				71A2B8F32BD3F84E0017B375 /* FeedKit in Frameworks */,
 				71A2B8B22BD177130017B375 /* Kingfisher in Frameworks */,
 				71A2B8B82BD177640017B375 /* CombineCocoa in Frameworks */,
 				71A2B8B52BD177370017B375 /* SnapKit in Frameworks */,
@@ -241,6 +245,7 @@
 		71A2B8BC2BD17D280017B375 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				71A2B8F42BD4169E0017B375 /* RSSParser */,
 				71A2B8CF2BD180320017B375 /* Cells */,
 				71A2B8BD2BD17D310017B375 /* Alerts */,
 			);
@@ -357,6 +362,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		71A2B8F42BD4169E0017B375 /* RSSParser */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8F52BD416AC0017B375 /* RSSParser.swift */,
+			);
+			path = RSSParser;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -378,6 +391,7 @@
 				71A2B8B42BD177370017B375 /* SnapKit */,
 				71A2B8B72BD177640017B375 /* CombineCocoa */,
 				71A2B8BA2BD177890017B375 /* CombineExt */,
+				71A2B8F22BD3F84E0017B375 /* FeedKit */,
 			);
 			productName = "RSS Feed";
 			productReference = 71A2B8522BD172A60017B375 /* RSS Feed.app */;
@@ -412,6 +426,7 @@
 				71A2B8B32BD177370017B375 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				71A2B8B62BD177640017B375 /* XCRemoteSwiftPackageReference "CombineCocoa" */,
 				71A2B8B92BD177890017B375 /* XCRemoteSwiftPackageReference "CombineExt" */,
+				71A2B8F12BD3F84E0017B375 /* XCRemoteSwiftPackageReference "FeedKit" */,
 			);
 			productRefGroup = 71A2B8532BD172A60017B375 /* Products */;
 			projectDirPath = "";
@@ -459,6 +474,7 @@
 				71A2B89F2BD174FE0017B375 /* Int+.swift in Sources */,
 				71A2B86F2BD173360017B375 /* AppRootViewModel.swift in Sources */,
 				71A2B8E02BD3DCB50017B375 /* FeedItemsListRouter.swift in Sources */,
+				71A2B8F62BD416AC0017B375 /* RSSParser.swift in Sources */,
 				71A2B8D42BD180590017B375 /* EmptyCellViewModel.swift in Sources */,
 				71A2B8942BD174FE0017B375 /* DateFormatter+.swift in Sources */,
 				71A2B8DA2BD1810A0017B375 /* FeedCellViewModel.swift in Sources */,
@@ -727,6 +743,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		71A2B8F12BD3F84E0017B375 /* XCRemoteSwiftPackageReference "FeedKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nmdias/FeedKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -749,6 +773,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 71A2B8B92BD177890017B375 /* XCRemoteSwiftPackageReference "CombineExt" */;
 			productName = CombineExt;
+		};
+		71A2B8F22BD3F84E0017B375 /* FeedKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 71A2B8F12BD3F84E0017B375 /* XCRemoteSwiftPackageReference "FeedKit" */;
+			productName = FeedKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
