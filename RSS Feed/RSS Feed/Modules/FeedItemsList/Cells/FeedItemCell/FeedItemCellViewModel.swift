@@ -1,30 +1,27 @@
 //
-//  FeedCellViewModel.swift
+//  FeedItemCellViewModel.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 18.04.2024..
+//  Created by Vedran Hernaus on 20.04.2024..
 //
 
-import UIKit
+import Foundation
 
-final class FeedCellViewModel {
+final class FeedItemCellViewModel {
     let id: String
     let title: String
     let description: String?
     let imageUrl: String?
-    let isFavorited: Bool
 
     init(
         id: String,
         title: String,
         description: String,
-        imageUrl: String?,
-        isFavorited: Bool
+        imageUrl: String?
     ) {
         self.id = id
         self.title = title
         self.description = description
         self.imageUrl = imageUrl
-        self.isFavorited = isFavorited
     }
 }

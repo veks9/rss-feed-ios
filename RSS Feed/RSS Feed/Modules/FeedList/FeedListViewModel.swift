@@ -69,7 +69,7 @@ extension FeedListViewModel {
     }
     
     func onRowSelect(with cellViewModel: FeedCellViewModel) {
-        
+        router.navigateToFeedItemsList(context: FeedItemsListContext())
     }
     
     func onAddFeedTap() {

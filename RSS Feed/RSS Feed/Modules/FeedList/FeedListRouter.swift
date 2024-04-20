@@ -11,6 +11,7 @@ protocol FeedListRouting: Alertable {
     var viewController: FeedListViewController? { get set }
     
     func presentAddNewFeedAlert(onSubmit: @escaping (String?) -> ())
+    func navigateToFeedItemsList(context: FeedItemsListContext)
 }
 
 final class FeedListRouter: FeedListRouting {
@@ -43,5 +44,14 @@ final class FeedListRouter: FeedListRouting {
         alertViewController.addAction(cancelAction)
         
         viewController?.present(alertViewController, animated: true)
+    }
+    
+    func navigateToFeedItemsList(context: FeedItemsListContext) {
+        let router = FeedItemsListRouter()
+        let viewModel = FeedItemsListViewModel(context: context, router: router)
+        let viewController = FeedItemsListViewController(viewModel: viewModel)
+        router.viewController = viewController
+        
+        self.viewController?.navigationController?.pushViewController(viewController, animated: true)
     }
 }

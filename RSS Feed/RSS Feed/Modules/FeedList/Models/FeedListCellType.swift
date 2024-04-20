@@ -16,7 +16,7 @@ extension FeedListCellType: Hashable  {
     static func == (lhs: FeedListCellType, rhs: FeedListCellType) -> Bool {
         switch (lhs, rhs) {
         case (.feed(let lhsViewModel), .feed(let rhsViewModel)):
-            return lhsViewModel.id == rhsViewModel.id && lhsViewModel.title == rhsViewModel.title && lhsViewModel.isFavorited == rhsViewModel.isFavorited
+            return lhsViewModel.id == rhsViewModel.id && lhsViewModel.isFavorited == rhsViewModel.isFavorited
         case (.empty, .empty):
             return true
         default:

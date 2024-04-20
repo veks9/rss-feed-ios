@@ -46,6 +46,15 @@
 		71A2B8D42BD180590017B375 /* EmptyCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8D32BD180590017B375 /* EmptyCellViewModel.swift */; };
 		71A2B8D82BD181050017B375 /* FeedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8D72BD181050017B375 /* FeedCell.swift */; };
 		71A2B8DA2BD1810A0017B375 /* FeedCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8D92BD1810A0017B375 /* FeedCellViewModel.swift */; };
+		71A2B8E02BD3DCB50017B375 /* FeedItemsListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8DC2BD3DCB50017B375 /* FeedItemsListRouter.swift */; };
+		71A2B8E12BD3DCB50017B375 /* FeedItemsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8DD2BD3DCB50017B375 /* FeedItemsListViewController.swift */; };
+		71A2B8E22BD3DCB50017B375 /* FeedItemsListContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8DE2BD3DCB50017B375 /* FeedItemsListContext.swift */; };
+		71A2B8E32BD3DCB50017B375 /* FeedItemsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8DF2BD3DCB50017B375 /* FeedItemsListViewModel.swift */; };
+		71A2B8E82BD3DE8D0017B375 /* FeedItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8E72BD3DE8D0017B375 /* FeedItemCell.swift */; };
+		71A2B8EA2BD3DE920017B375 /* FeedItemCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8E92BD3DE920017B375 /* FeedItemCellViewModel.swift */; };
+		71A2B8EC2BD3E3410017B375 /* FeedItemsListCellType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8EB2BD3E3410017B375 /* FeedItemsListCellType.swift */; };
+		71A2B8EE2BD3E3480017B375 /* FeedItemsListSectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8ED2BD3E3480017B375 /* FeedItemsListSectionType.swift */; };
+		71A2B8F02BD3E34E0017B375 /* FeedItemsListSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8EF2BD3E34E0017B375 /* FeedItemsListSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +95,15 @@
 		71A2B8D32BD180590017B375 /* EmptyCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyCellViewModel.swift; sourceTree = "<group>"; };
 		71A2B8D72BD181050017B375 /* FeedCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCell.swift; sourceTree = "<group>"; };
 		71A2B8D92BD1810A0017B375 /* FeedCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellViewModel.swift; sourceTree = "<group>"; };
+		71A2B8DC2BD3DCB50017B375 /* FeedItemsListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListRouter.swift; sourceTree = "<group>"; };
+		71A2B8DD2BD3DCB50017B375 /* FeedItemsListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListViewController.swift; sourceTree = "<group>"; };
+		71A2B8DE2BD3DCB50017B375 /* FeedItemsListContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListContext.swift; sourceTree = "<group>"; };
+		71A2B8DF2BD3DCB50017B375 /* FeedItemsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListViewModel.swift; sourceTree = "<group>"; };
+		71A2B8E72BD3DE8D0017B375 /* FeedItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemCell.swift; sourceTree = "<group>"; };
+		71A2B8E92BD3DE920017B375 /* FeedItemCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemCellViewModel.swift; sourceTree = "<group>"; };
+		71A2B8EB2BD3E3410017B375 /* FeedItemsListCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListCellType.swift; sourceTree = "<group>"; };
+		71A2B8ED2BD3E3480017B375 /* FeedItemsListSectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListSectionType.swift; sourceTree = "<group>"; };
+		71A2B8EF2BD3E34E0017B375 /* FeedItemsListSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemsListSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +164,7 @@
 		71A2B86A2BD1731C0017B375 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				71A2B8DB2BD3DCAA0017B375 /* FeedItemsList */,
 				71A2B8A72BD175A40017B375 /* FeedList */,
 				71A2B86B2BD173240017B375 /* AppRoot */,
 			);
@@ -298,6 +317,46 @@
 			path = FeedCell;
 			sourceTree = "<group>";
 		};
+		71A2B8DB2BD3DCAA0017B375 /* FeedItemsList */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8E62BD3DE780017B375 /* Models */,
+				71A2B8E42BD3DE6C0017B375 /* Cells */,
+				71A2B8DC2BD3DCB50017B375 /* FeedItemsListRouter.swift */,
+				71A2B8DD2BD3DCB50017B375 /* FeedItemsListViewController.swift */,
+				71A2B8DE2BD3DCB50017B375 /* FeedItemsListContext.swift */,
+				71A2B8DF2BD3DCB50017B375 /* FeedItemsListViewModel.swift */,
+			);
+			path = FeedItemsList;
+			sourceTree = "<group>";
+		};
+		71A2B8E42BD3DE6C0017B375 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8E52BD3DE710017B375 /* FeedItemCell */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		71A2B8E52BD3DE710017B375 /* FeedItemCell */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8E72BD3DE8D0017B375 /* FeedItemCell.swift */,
+				71A2B8E92BD3DE920017B375 /* FeedItemCellViewModel.swift */,
+			);
+			path = FeedItemCell;
+			sourceTree = "<group>";
+		};
+		71A2B8E62BD3DE780017B375 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				71A2B8EB2BD3E3410017B375 /* FeedItemsListCellType.swift */,
+				71A2B8ED2BD3E3480017B375 /* FeedItemsListSectionType.swift */,
+				71A2B8EF2BD3E34E0017B375 /* FeedItemsListSection.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -392,25 +451,34 @@
 				71A2B8A32BD174FE0017B375 /* Double+.swift in Sources */,
 				71A2B8AD2BD175B00017B375 /* FeedListViewController.swift in Sources */,
 				71A2B8A42BD174FE0017B375 /* Optional+.swift in Sources */,
+				71A2B8E82BD3DE8D0017B375 /* FeedItemCell.swift in Sources */,
 				71A2B8962BD174FE0017B375 /* UIFont+.swift in Sources */,
+				71A2B8E22BD3DCB50017B375 /* FeedItemsListContext.swift in Sources */,
 				71A2B8CA2BD17F980017B375 /* FeedListCellType.swift in Sources */,
 				71A2B8C32BD17D310017B375 /* Alertable.swift in Sources */,
 				71A2B89F2BD174FE0017B375 /* Int+.swift in Sources */,
 				71A2B86F2BD173360017B375 /* AppRootViewModel.swift in Sources */,
+				71A2B8E02BD3DCB50017B375 /* FeedItemsListRouter.swift in Sources */,
 				71A2B8D42BD180590017B375 /* EmptyCellViewModel.swift in Sources */,
 				71A2B8942BD174FE0017B375 /* DateFormatter+.swift in Sources */,
 				71A2B8DA2BD1810A0017B375 /* FeedCellViewModel.swift in Sources */,
+				71A2B8E32BD3DCB50017B375 /* FeedItemsListViewModel.swift in Sources */,
 				71A2B8A02BD174FE0017B375 /* Collection+.swift in Sources */,
 				71A2B8782BD1745A0017B375 /* Assets.swift in Sources */,
 				71A2B8CC2BD17FA60017B375 /* FeedListSectionType.swift in Sources */,
+				71A2B8EE2BD3E3480017B375 /* FeedItemsListSectionType.swift in Sources */,
 				71A2B8A62BD174FE0017B375 /* String+Localization.swift in Sources */,
+				71A2B8EA2BD3DE920017B375 /* FeedItemCellViewModel.swift in Sources */,
 				71A2B8D82BD181050017B375 /* FeedCell.swift in Sources */,
 				71A2B8AC2BD175B00017B375 /* FeedListRouter.swift in Sources */,
+				71A2B8EC2BD3E3410017B375 /* FeedItemsListCellType.swift in Sources */,
 				71A2B8CE2BD17FB30017B375 /* FeedListSection.swift in Sources */,
 				71A2B8982BD174FE0017B375 /* UIView+.swift in Sources */,
 				71A2B8562BD172A60017B375 /* AppDelegate.swift in Sources */,
 				71A2B89B2BD174FE0017B375 /* UITableView+.swift in Sources */,
 				71A2B8A22BD174FE0017B375 /* String+.swift in Sources */,
+				71A2B8F02BD3E34E0017B375 /* FeedItemsListSection.swift in Sources */,
+				71A2B8E12BD3DCB50017B375 /* FeedItemsListViewController.swift in Sources */,
 				71A2B8932BD174FE0017B375 /* UINavigationController+.swift in Sources */,
 				71A2B8AF2BD175B00017B375 /* FeedListViewModel.swift in Sources */,
 			);

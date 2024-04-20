@@ -1,8 +1,8 @@
 //
-//  FeedListViewController.swift
+//  FeedItemsListViewController.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 18.04.2024..
+//  Created by Vedran Hernaus on 20.04.2024..
 //
 
 import UIKit
@@ -10,40 +10,36 @@ import Combine
 import CombineCocoa
 import SnapKit
 
-final class FeedListViewController: UIViewController {
+final class FeedItemsListViewController: UIViewController {
     
-    private let viewModel: FeedListViewModeling
+    private let viewModel: FeedItemsListViewModeling
     
     private var cancellables = Set<AnyCancellable>()
     
-    typealias DataSource = UITableViewDiffableDataSource<FeedListSectionType, FeedListCellType>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<FeedListSectionType, FeedListCellType>
+    typealias DataSource = UITableViewDiffableDataSource<FeedItemsListSectionType, FeedItemsListCellType>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<FeedItemsListSectionType, FeedItemsListCellType>
     private lazy var dataSource: DataSource = makeDataSource()
     
     // MARK: - Views
     
-    private let addFeedNavigationItem = UIBarButtonItem(
-        image: Assets.plus.systemImage,
+    private let markAsFavoriteNavigationItem = UIBarButtonItem(
+        image: nil,
         style: .plain,
-        target: FeedListViewController.self,
+        target: FeedItemsListViewController.self,
         action: nil
     )
     
-    private let showFavoritesNavigationItem = UIBarButtonItem(
-        image: nil,
-        style: .plain,
-        target: FeedListViewController.self,
-        action: nil
-    )
+    private let refreshControl = UIRefreshControl()
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
-        tableView.register(FeedCell.self, forCellReuseIdentifier: FeedCell.identity)
+        tableView.register(FeedItemCell.self, forCellReuseIdentifier: FeedItemCell.identity)
         tableView.register(EmptyCell.self, forCellReuseIdentifier: EmptyCell.identity)
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = .white
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.keyboardDismissMode = .onDrag
+        tableView.refreshControl = refreshControl
         tableView.delegate = self
         
         return tableView
@@ -51,7 +47,7 @@ final class FeedListViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    init(viewModel: FeedListViewModeling) {
+    init(viewModel: FeedItemsListViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -74,9 +70,8 @@ final class FeedListViewController: UIViewController {
     
     private func styleView() {
         view.backgroundColor = .white
-        navigationItem.title = "feed_list_navigation_title".localized()
-        navigationItem.leftBarButtonItem = showFavoritesNavigationItem
-        navigationItem.rightBarButtonItem = addFeedNavigationItem
+        navigationItem.title = viewModel.navigationTitle
+        navigationItem.rightBarButtonItem = markAsFavoriteNavigationItem
     }
     
     private func addSubviews() {
@@ -91,31 +86,32 @@ final class FeedListViewController: UIViewController {
     }
     
     private func observe() {
-        viewModel.showFavoritesImage
-            .sink(receiveValue: { [weak self] showFavoritesImage in
+        viewModel.markAsFavoriteImage
+            .sink(receiveValue: { [weak self] markAsFavoriteImage in
                 guard let self else { return }
-                showFavoritesNavigationItem.image = showFavoritesImage
+                markAsFavoriteNavigationItem.image = markAsFavoriteImage
             })
             .store(in: &cancellables)
-        
+
         viewModel.dataSource
             .sink(receiveValue: { [weak self] dataSource in
                 guard let self else { return }
+                refreshControl.endRefreshing()
                 applySnapshot(sections: dataSource)
             })
             .store(in: &cancellables)
         
-        addFeedNavigationItem.tapPublisher
-            .sink(receiveValue: { [weak self] _ in
-                guard let self else { return }
-                viewModel.onAddFeedTap()
+        refreshControl.isRefreshingPublisher
+            .sink(receiveValue: { [weak self] isRefreshing in
+                guard let self, isRefreshing else { return }
+                viewModel.onPullToRefresh()
             })
             .store(in: &cancellables)
         
-        showFavoritesNavigationItem.tapPublisher
+        markAsFavoriteNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
                 guard let self else { return }
-                viewModel.onShowFavoritesTap()
+                viewModel.onMarkAsFavoriteTap()
             })
             .store(in: &cancellables)
     }
@@ -125,8 +121,8 @@ final class FeedListViewController: UIViewController {
             tableView: tableView
         ) { tableView, indexPath, itemIdentifier -> UITableViewCell? in
             switch itemIdentifier {
-            case .feed(let cellViewModel):
-                let cell: FeedCell = tableView.dequeueCellAtIndexPath(indexPath: indexPath)
+            case .feedItem(let cellViewModel):
+                let cell: FeedItemCell = tableView.dequeueCellAtIndexPath(indexPath: indexPath)
                 cell.updateUI(viewModel: cellViewModel)
 
                 return cell
@@ -141,7 +137,7 @@ final class FeedListViewController: UIViewController {
         return dataSource
     }
     
-    private func applySnapshot(sections: [FeedListSection]) {
+    private func applySnapshot(sections: [FeedItemsListSection]) {
         var snapshot = Snapshot()
         snapshot.appendSections(sections.map{ $0.section} )
         sections.forEach { section in
@@ -153,10 +149,10 @@ final class FeedListViewController: UIViewController {
 
 // MARK: - UITableViewDelegate
 
-extension FeedListViewController: UITableViewDelegate {
+extension FeedItemsListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed(let cellViewModel):
+        case .feedItem(let cellViewModel):
             viewModel.onRowSelect(with: cellViewModel)
         default:
             break
@@ -165,7 +161,7 @@ extension FeedListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed:
+        case .feedItem:
             return UITableView.automaticDimension
         case .empty:
             return tableView.frame.height
@@ -176,28 +172,12 @@ extension FeedListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed:
+        case .feedItem:
             return UITableView.automaticDimension
         case .empty:
             return tableView.frame.height
         default:
             return UITableView.automaticDimension
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed(let cellViewModel):
-            let deleteAction = UIContextualAction(style: .destructive, title: "feed_list_cell_delete_action_title".localized()) { [weak self] action, view, handler in
-                self?.viewModel.onSwipeToDelete(with: cellViewModel)
-            }
-            deleteAction.backgroundColor = .red
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-            configuration.performsFirstActionWithFullSwipe = true
-            
-            return configuration
-        default:
-            return nil
         }
     }
 }
