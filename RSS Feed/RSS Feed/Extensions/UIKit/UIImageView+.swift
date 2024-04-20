@@ -9,10 +9,10 @@ import Kingfisher
 import UIKit
 
 extension UIImageView {
-    func setImage(_ urlString: String?, options: KingfisherOptionsInfo? = nil) {
+    func setImage(_ urlString: String?, placeholder: UIImage? = nil, options: KingfisherOptionsInfo? = nil) {
         guard let urlString = urlString else { return }
         startKFIndicator()
-        kf.setImage(with: urlString.toURL(), options: options)
+        kf.setImage(with: urlString.toURL(), placeholder: placeholder, options: options)
     }
 
     func setImage(_ url: URL?, spinnerViewColor: UIColor = .black) {
