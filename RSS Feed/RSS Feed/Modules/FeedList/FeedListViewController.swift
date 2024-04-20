@@ -188,11 +188,19 @@ extension FeedListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         switch dataSource.itemIdentifier(for: indexPath) {
         case .feed(let cellViewModel):
-            let deleteAction = UIContextualAction(style: .destructive, title: "feed_list_cell_delete_action_title".localized()) { [weak self] action, view, handler in
+            let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] action, view, handler in
                 self?.viewModel.onSwipeToDelete(with: cellViewModel)
             }
             deleteAction.backgroundColor = .red
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+            deleteAction.image = Assets.trash.systemImage?.withTintColor(.white)
+            
+            let favoriteAction = UIContextualAction(style: .normal, title: nil) { [weak self] action, view, handler in
+                self?.viewModel.onMarkFeedFavorite(with: cellViewModel)
+            }
+            favoriteAction.backgroundColor = cellViewModel.isFavorited ? .systemIndigo : .lightGray
+            favoriteAction.image = (cellViewModel.isFavorited ? Assets.starFill.systemImage : Assets.star.systemImage)?.withTintColor(.white)
+            
+            let configuration = UISwipeActionsConfiguration(actions: [deleteAction, favoriteAction])
             configuration.performsFirstActionWithFullSwipe = true
             
             return configuration

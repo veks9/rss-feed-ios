@@ -18,6 +18,7 @@ protocol FeedListViewModeling {
     func onAddFeedTap()
     func onShowFavoritesTap()
     func onSwipeToDelete(with cellViewModel: FeedCellViewModel)
+    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel)
 }
 
 final class FeedListViewModel: FeedListViewModeling {
@@ -50,7 +51,7 @@ final class FeedListViewModel: FeedListViewModeling {
                     FeedListSection(
                         section: .standard,
                         items: [
-                            .feed(FeedCellViewModel(id: "0", title: "BBC News", description: "BBC News", imageUrl: nil, isFavorited: false)),
+                            .feed(FeedCellViewModel(id: "0", title: "BBC News", description: "BBC News", imageUrl: nil, isFavorited: true)),
                             .feed(FeedCellViewModel(id: "1", title: "NY Times News", description: "NY Times News World", imageUrl: "https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png", isFavorited: false))
                         ]
                     )
@@ -83,4 +84,6 @@ extension FeedListViewModel {
     func onSwipeToDelete(with cellViewModel: FeedCellViewModel) {
         itemForDeletionIdSubject.send(cellViewModel.id)
     }
+    
+    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel) {}
 }

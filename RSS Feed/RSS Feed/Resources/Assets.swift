@@ -14,6 +14,7 @@ enum Assets: String {
     case starFill = "star.fill"
     case chevronRight = "chevron.right"
     case rssPlaceholder = "rss-placeholder"
+    case trash
     
     var image: UIImage? {
         UIImage(named: rawValue)
