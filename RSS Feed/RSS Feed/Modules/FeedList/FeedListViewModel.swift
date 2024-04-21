@@ -8,10 +8,12 @@
 import UIKit
 import Combine
 import CombineExt
+import FeedKit
 
 protocol FeedListViewModeling {
     var showFavoritesImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedListSection], Never> { get }
+    var handleAddingFeed: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
@@ -24,13 +26,22 @@ protocol FeedListViewModeling {
 final class FeedListViewModel: FeedListViewModeling {
     
     private let router: FeedListRouting
+    private let userDefaultsService: UserDefaultsServicing
+    private let feedService: FeedServicing
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private let isFavoritesIconSelected = CurrentValueSubject<Bool, Never>(false)
     private let itemForDeletionIdSubject = PassthroughSubject<String, Never>()
+    private let itemForInsertionUrlSubject = PassthroughSubject<URL, Never>()
     
-    init(router: FeedListRouting) {
+    init(
+        router: FeedListRouting,
+        userDefaultsService: UserDefaultsServicing = UserDefaultsService.shared,
+        feedService: FeedServicing = FeedService.shared
+    ) {
         self.router = router
+        self.userDefaultsService = userDefaultsService
+        self.feedService = feedService
     }
     
     var showFavoritesImage: AnyPublisher<UIImage?, Never> {
@@ -44,22 +55,93 @@ final class FeedListViewModel: FeedListViewModeling {
         .eraseToAnyPublisher()
     }
     
-    lazy var dataSource: AnyPublisher<[FeedListSection], Never> = {
+    lazy var models: AnyPublisher<[RSSFeed], Never> = {
         viewDidLoadSubject
-            .flatMapLatest { _ in
-                Just([
-                    FeedListSection(
-                        section: .standard,
-                        items: [
-                            .feed(FeedCellViewModel(id: "0", title: "BBC News", description: "BBC News", imageUrl: nil, isFavorited: true)),
-                            .feed(FeedCellViewModel(id: "1", title: "NY Times News", description: "NY Times News World", imageUrl: "https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png", isFavorited: false))
-                        ]
-                    )
-                ])
+            .flatMap { [userDefaultsService] _ in
+                userDefaultsService.feedUrls
+            }
+            .flatMapLatest({ [feedService] feedUrls in
+                feedService.getFeeds(for: feedUrls.compactMap { URL(string: $0) })
+                    .catch({ error in
+                        print("🔴🔴🔴🔴\(error)🔴🔴🔴🔴")
+                        return Empty<[RSSFeed], Never>(completeImmediately: false).eraseToAnyPublisher()
+                    })
+                    .ignoreFailure()
+            })
+            .share(replay: 1)
+            .eraseToAnyPublisher()
+    }()
+    
+    lazy var dataSource: AnyPublisher<[FeedListSection], Never> = {
+        models
+            .map { [weak self] models in
+                guard let self else { return [] }
+                return createFeedCells(from: models)
             }
             .share(replay: 1)
             .eraseToAnyPublisher()
     }()
+    
+    var handleAddingFeed: AnyPublisher<Void, Never> {
+        itemForInsertionUrlSubject
+            .withLatestFrom(userDefaultsService.feedUrls) { ($0, $1) }
+            .handleEvents(receiveOutput: { [weak self] itemForInsertionUrl, feedUrls in
+                guard let self else { return }
+                if feedUrls.contains(itemForInsertionUrl.absoluteString) {
+                    // TODO: - error, already exists
+                } else {
+                    var newFeedUrls = feedUrls
+                    newFeedUrls.append(itemForInsertionUrl.absoluteString)
+                    userDefaultsService.setFeedUrls(newFeedUrls)
+                }
+            })
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
+    private func addFeed(with urlString: String?) {
+        // TODO: - check if this is rss
+        if let urlString = urlString, let url = URL(string: urlString)  {
+            itemForInsertionUrlSubject.send(url)
+        } else {
+            // TODO: - show error wrong url
+        }
+    }
+    
+    private func createFeedCells(from models: [RSSFeed]) -> [FeedListSection] {
+        let emptyCell = FeedListCellType.empty(
+            EmptyCellViewModel(
+                id: "emptyCell",
+                image: Assets.plus.systemImage,
+                descriptionText: "feed_list_empty_description".localized()
+            )
+        )
+        return models.isEmpty ?
+        [FeedListSection(section: .standard, items: [emptyCell])] :
+        [FeedListSection(section: .standard, items: getCells(from: models))]
+    }
+    
+    private func getCells(from models: [RSSFeed]) -> [FeedListCellType] {
+        var dataSource: [FeedListCellType] = []
+        let cells = getFeedCells(from: models)
+        dataSource.append(contentsOf: cells)
+        
+        return dataSource
+    }
+    
+    private func getFeedCells(from models: [RSSFeed]) -> [FeedListCellType] {
+        models.map { feed in
+            .feed(
+                FeedCellViewModel(
+                    id: UUID().uuidString,
+                    title: feed.title ?? "[-]",
+                    description: feed.description ?? "[-]",
+                    imageUrl: feed.image?.url,
+                    isFavorited: false
+                )
+            )
+        }
+    }
 }
 
 // MARK: - Internal functions
@@ -74,7 +156,9 @@ extension FeedListViewModel {
     }
     
     func onAddFeedTap() {
-        router.presentAddNewFeedAlert { feedUrl in }
+        router.presentAddNewFeedAlert { [weak self] feedUrl in
+            self?.addFeed(with: feedUrl)
+        }
     }
     
     func onShowFavoritesTap() {

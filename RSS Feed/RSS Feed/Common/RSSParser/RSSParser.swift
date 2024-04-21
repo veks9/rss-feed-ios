@@ -13,7 +13,7 @@ protocol RSSParsing {
     func parse(url: URL) -> Future<RSSFeed?, ParserError>
 }
 
-final class RSSParser {
+final class RSSParser: RSSParsing {
     func parse(url: URL) -> Future<RSSFeed?, ParserError> {
         Future { promise in
             FeedParser(URL: url).parseAsync { result in

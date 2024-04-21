@@ -59,6 +59,7 @@ final class EmptyCell: UITableViewCell {
 
     private func addSubviews() {
         contentView.addSubview(verticalStackView)
+        
         verticalStackView.addArrangedSubview(emptyImageView)
         verticalStackView.addArrangedSubview(descriptionLabel)
     }

@@ -37,11 +37,11 @@ final class FeedListRouter: FeedListRouting {
         }
         let cancelAction = UIAlertAction(
             title: "feed_list_add_new_feed_cancel_button_title".localized(),
-            style: .default
+            style: .cancel
         )
         
-        alertViewController.addAction(submitAction)
         alertViewController.addAction(cancelAction)
+        alertViewController.addAction(submitAction)
         
         viewController?.present(alertViewController, animated: true)
     }

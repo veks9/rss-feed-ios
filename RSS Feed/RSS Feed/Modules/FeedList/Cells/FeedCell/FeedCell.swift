@@ -17,8 +17,6 @@ final class FeedCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true
-        imageView.layer.borderWidth = 1.0
-        imageView.layer.borderColor = UIColor.lightGray.cgColor
         imageView.image = Assets.rssPlaceholder.image
         
         return imageView
