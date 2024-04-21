@@ -14,6 +14,7 @@ protocol FeedServicing {
     
     func fetchFeed(for feedUrl: URL) -> Future<RSSFeed?, ParserError>
     func createFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error>
+    func updateFeed(feed: FeedModel) -> Future<FeedModel, Error>
     func deleteFeed(with feedId: String) -> Future<FeedModel, Error>
     func getAllFeeds() -> Future<[FeedModel], Error>
 }
@@ -48,6 +49,25 @@ final class FeedService: FeedServicing {
                 guard let self else { return }
                 let feed = FeedModel(from: model, rssUrl: rssUrl, isFavorited: false)
                 do {
+                    try persistenceManager.saveFeedsIfHasChanges()
+                    promise(.success(feed))
+                } catch {
+                    promise(.failure(error))
+                }
+            }
+        }
+    }
+    
+    func updateFeed(feed: FeedModel) -> Future<FeedModel, Error> {
+        Future<FeedModel, Error> { [weak self] promise in
+            guard let self else { return }
+            persistenceManager.feedsBackgroundContext.perform { [weak self] in
+                guard let self else { return }
+                do {
+                    let request = FeedModel.fetchRequest()
+                    let feeds = try persistenceManager.feedsBackgroundContext.fetch(request)
+                    let objectToEdit = feeds.first(where: { $0.id == feed.id })
+                    objectToEdit?.update(with: feed)
                     try persistenceManager.saveFeedsIfHasChanges()
                     promise(.success(feed))
                 } catch {

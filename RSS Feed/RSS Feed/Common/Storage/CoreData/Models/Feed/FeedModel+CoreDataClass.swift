@@ -47,4 +47,15 @@ public class FeedModel: NSManagedObject {
         self.items = NSSet(array: model.items?.map { FeedItemModel(from: $0) } ?? [])
         self.isFavorited = isFavorited
     }
+    
+    func update(with model: FeedModel) {
+        self.id = model.id
+        self.rssUrl = model.rssUrl
+        self.title = model.title
+        self.feedDescription = model.feedDescription
+        self.imageUrl = model.imageUrl
+        self.updatedAt = model.updatedAt
+        self.items = model.items
+        self.isFavorited = model.isFavorited
+    }
 }

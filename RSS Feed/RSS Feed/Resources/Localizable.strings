@@ -18,3 +18,4 @@
 "feed_list_feed_adding_failure" = "Error while adding feed. Check given URL";
 "feed_list_feed_fetching_failure" = "Error while fetching feed. Check given URL";
 "feed_list_feed_deleting_failure" = "Error while deleting feed";
+"feed_list_feed_favoriting_failure" = "Error while favoriting feed";

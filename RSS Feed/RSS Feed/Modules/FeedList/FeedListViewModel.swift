@@ -17,6 +17,7 @@ protocol FeedListViewModeling {
     var handleAddingFeed: AnyPublisher<Void, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var handleDeletingFeed: AnyPublisher<Void, Never> { get }
+    var handleFavoritingFeed: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
@@ -37,6 +38,7 @@ final class FeedListViewModel: FeedListViewModeling {
     private let itemForDeletionIdSubject = PassthroughSubject<String, Never>()
     private let itemForInsertionUrlSubject = PassthroughSubject<URL, Never>()
     private let isLoadingSubject = PassthroughSubject<Bool, Never>()
+    private let itemForFavoritingIdSubject = PassthroughSubject<String, Never>()
     
     init(
         router: FeedListRouting,
@@ -71,7 +73,7 @@ final class FeedListViewModel: FeedListViewModeling {
         })
             .flatMap { [feedService] _ in
                 feedService.getAllFeeds()
-                    .catch { [weak self] error in
+                    .catch { [weak self] _ in
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
                                 title: "feed_list_feed_fetching_failure".localized(),
@@ -109,7 +111,7 @@ final class FeedListViewModel: FeedListViewModeling {
             .flatMap({ [feedService] itemForInsertionUrl in
                 feedService.fetchFeed(for: itemForInsertionUrl)
                     .receive(on: DispatchQueue.main)
-                    .catch { [weak self] error in
+                    .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
@@ -162,7 +164,7 @@ final class FeedListViewModel: FeedListViewModeling {
             .flatMap { [feedService] itemForDeletionId in
                 feedService.deleteFeed(with: itemForDeletionId)
                     .receive(on: DispatchQueue.main)
-                    .catch { [weak self] error in
+                    .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
@@ -177,6 +179,30 @@ final class FeedListViewModel: FeedListViewModeling {
             }
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isLoadingSubject.send(false)
+            })
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
+    var handleFavoritingFeed: AnyPublisher<Void, Never> {
+        itemForFavoritingIdSubject
+            .withLatestFrom(models) { ($0, $1) }
+            .flatMap({ [weak self] id, models in
+                guard let self, let model = models.first(where: { $0.id == id }) else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
+                model.isFavorited = !model.isFavorited
+                return feedService.updateFeed(feed: model)
+                    .receive(on: DispatchQueue.main)
+                    .catch {[weak self] _ in
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_list_feed_favoriting_failure".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
+                    .ignoreFailure()
             })
             .map { _ in }
             .eraseToAnyPublisher()
@@ -225,7 +251,7 @@ final class FeedListViewModel: FeedListViewModeling {
                     title: feed.title ?? "[-]",
                     description: feed.feedDescription ?? "[-]",
                     imageUrl: feed.imageUrl,
-                    isFavorited: false
+                    isFavorited: feed.isFavorited
                 )
             )
         }
@@ -257,5 +283,7 @@ extension FeedListViewModel {
         itemForDeletionIdSubject.send(cellViewModel.id)
     }
     
-    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel) {}
+    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel) {
+        itemForFavoritingIdSubject.send(cellViewModel.id)
+    }
 }

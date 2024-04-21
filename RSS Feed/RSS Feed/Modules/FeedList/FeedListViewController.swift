@@ -116,6 +116,10 @@ final class FeedListViewController: UIViewController {
         viewModel.handleDeletingFeed
             .sink { _ in }
             .store(in: &cancellables)
+         
+        viewModel.handleFavoritingFeed
+            .sink { _ in }
+            .store(in: &cancellables)
         
         addFeedNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
@@ -201,6 +205,7 @@ extension FeedListViewController: UITableViewDelegate {
             
             let favoriteAction = UIContextualAction(style: .normal, title: nil) { [weak self] action, view, handler in
                 self?.viewModel.onMarkFeedFavorite(with: cellViewModel)
+                handler(true)
             }
             favoriteAction.backgroundColor = cellViewModel.isFavorited ? .systemIndigo : .lightGray
             favoriteAction.image = (cellViewModel.isFavorited ? Assets.starFill.systemImage : Assets.star.systemImage)?.withTintColor(.white)
