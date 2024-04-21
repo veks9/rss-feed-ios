@@ -14,3 +14,7 @@
 "feed_list_add_new_feed_submit_button_title" = "Submit";
 "feed_list_add_new_feed_cancel_button_title" = "Cancel";
 "feed_list_cell_delete_action_title" = "Delete";
+"feed_list_feed_already_exists" = "Feed already exists";
+"feed_list_feed_adding_failure" = "Error while adding feed. Check given URL";
+"feed_list_feed_fetching_failure" = "Error while fetching feed. Check given URL";
+"feed_list_feed_deleting_failure" = "Error while deleting feed";

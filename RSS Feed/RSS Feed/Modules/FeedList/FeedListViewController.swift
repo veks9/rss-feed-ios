@@ -29,12 +29,14 @@ final class FeedListViewController: UIViewController {
         action: nil
     )
     
-    private let showFavoritesNavigationItem = UIBarButtonItem(
-        image: nil,
-        style: .plain,
-        target: FeedListViewController.self,
-        action: nil
-    )
+    private lazy var loadingSpinnerView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView()
+        view.hidesWhenStopped = true
+        
+        return view
+    }()
+    
+    private lazy var loadingSpinnerNavigationItem = UIBarButtonItem(customView: loadingSpinnerView)
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
@@ -75,7 +77,7 @@ final class FeedListViewController: UIViewController {
     private func styleView() {
         view.backgroundColor = .white
         navigationItem.title = "feed_list_navigation_title".localized()
-        navigationItem.leftBarButtonItem = showFavoritesNavigationItem
+        navigationItem.leftBarButtonItem = loadingSpinnerNavigationItem
         navigationItem.rightBarButtonItem = addFeedNavigationItem
     }
     
@@ -91,14 +93,16 @@ final class FeedListViewController: UIViewController {
     }
     
     private func observe() {
-        viewModel.showFavoritesImage
-            .sink(receiveValue: { [weak self] showFavoritesImage in
+        viewModel.isLoading
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] isLoading in
                 guard let self else { return }
-                showFavoritesNavigationItem.image = showFavoritesImage
+                isLoading ? loadingSpinnerView.startAnimating() : loadingSpinnerView.stopAnimating()
             })
             .store(in: &cancellables)
         
         viewModel.dataSource
+            .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] dataSource in
                 guard let self else { return }
                 applySnapshot(sections: dataSource)
@@ -107,19 +111,16 @@ final class FeedListViewController: UIViewController {
         
         viewModel.handleAddingFeed
             .sink { _ in }
+            .store(in: &cancellables)        
+        
+        viewModel.handleDeletingFeed
+            .sink { _ in }
             .store(in: &cancellables)
         
         addFeedNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
                 guard let self else { return }
                 viewModel.onAddFeedTap()
-            })
-            .store(in: &cancellables)
-        
-        showFavoritesNavigationItem.tapPublisher
-            .sink(receiveValue: { [weak self] _ in
-                guard let self else { return }
-                viewModel.onShowFavoritesTap()
             })
             .store(in: &cancellables)
     }

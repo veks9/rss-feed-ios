@@ -11,13 +11,17 @@ import CombineExt
 import FeedKit
 
 protocol FeedListViewModeling {
+    // TODO: - remove showFavorites image if unused in future
     var showFavoritesImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedListSection], Never> { get }
     var handleAddingFeed: AnyPublisher<Void, Never> { get }
+    var isLoading: AnyPublisher<Bool, Never> { get }
+    var handleDeletingFeed: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
     func onAddFeedTap()
+    // TODO: - remove onShowFavoritesTap if unused in future
     func onShowFavoritesTap()
     func onSwipeToDelete(with cellViewModel: FeedCellViewModel)
     func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel)
@@ -26,22 +30,24 @@ protocol FeedListViewModeling {
 final class FeedListViewModel: FeedListViewModeling {
     
     private let router: FeedListRouting
-    private let userDefaultsService: UserDefaultsServicing
     private let feedService: FeedServicing
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private let isFavoritesIconSelected = CurrentValueSubject<Bool, Never>(false)
     private let itemForDeletionIdSubject = PassthroughSubject<String, Never>()
     private let itemForInsertionUrlSubject = PassthroughSubject<URL, Never>()
+    private let isLoadingSubject = PassthroughSubject<Bool, Never>()
     
     init(
         router: FeedListRouting,
-        userDefaultsService: UserDefaultsServicing = UserDefaultsService.shared,
         feedService: FeedServicing = FeedService.shared
     ) {
         self.router = router
-        self.userDefaultsService = userDefaultsService
         self.feedService = feedService
+    }
+    
+    var isLoading: AnyPublisher<Bool, Never> {
+        isLoadingSubject.eraseToAnyPublisher()
     }
     
     var showFavoritesImage: AnyPublisher<UIImage?, Never> {
@@ -55,19 +61,29 @@ final class FeedListViewModel: FeedListViewModeling {
         .eraseToAnyPublisher()
     }
     
-    lazy var models: AnyPublisher<[RSSFeed], Never> = {
-        viewDidLoadSubject
-            .flatMap { [userDefaultsService] _ in
-                userDefaultsService.feedUrls
-            }
-            .flatMapLatest({ [feedService] feedUrls in
-                feedService.getFeeds(for: feedUrls.compactMap { URL(string: $0) })
-                    .catch({ error in
-                        print("🔴🔴🔴🔴\(error)🔴🔴🔴🔴")
-                        return Empty<[RSSFeed], Never>(completeImmediately: false).eraseToAnyPublisher()
-                    })
+    lazy var models: AnyPublisher<[FeedModel], Never> = {
+        Publishers.CombineLatest(
+            viewDidLoadSubject,
+            feedService.feedsChanged.prepend(())
+        )
+        .handleEvents(receiveOutput: { [weak self] _ in
+            self?.isLoadingSubject.send(true)
+        })
+            .flatMap { [feedService] _ in
+                feedService.getAllFeeds()
+                    .catch { [weak self] error in
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_list_feed_fetching_failure".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                        self?.isLoadingSubject.send(false)
+                        return Empty<[FeedModel], Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
                     .ignoreFailure()
-            })
+            }
             .share(replay: 1)
             .eraseToAnyPublisher()
     }()
@@ -78,37 +94,109 @@ final class FeedListViewModel: FeedListViewModeling {
                 guard let self else { return [] }
                 return createFeedCells(from: models)
             }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(false)
+            })
             .share(replay: 1)
             .eraseToAnyPublisher()
     }()
     
     var handleAddingFeed: AnyPublisher<Void, Never> {
         itemForInsertionUrlSubject
-            .withLatestFrom(userDefaultsService.feedUrls) { ($0, $1) }
-            .handleEvents(receiveOutput: { [weak self] itemForInsertionUrl, feedUrls in
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(true)
+            })
+            .flatMap({ [feedService] itemForInsertionUrl in
+                feedService.fetchFeed(for: itemForInsertionUrl)
+                    .receive(on: DispatchQueue.main)
+                    .catch { [weak self] error in
+                        self?.isLoadingSubject.send(false)
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_list_feed_fetching_failure".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                        return Empty<RSSFeed?, Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
+                    .ignoreFailure()
+                    .map { ($0, itemForInsertionUrl) }
+            })
+            .withLatestFrom(models) { ($0.0, $0.1, $1) }
+            .receive(on: DispatchQueue.main)
+            .handleEvents(receiveOutput: { [weak self] newFeed, itemForInsertionUrl, feeds in
                 guard let self else { return }
-                if feedUrls.contains(itemForInsertionUrl.absoluteString) {
-                    // TODO: - error, already exists
+                isLoadingSubject.send(false)
+                if let newFeed = newFeed {
+                    if feeds.contains(where: { $0.rssUrl == itemForInsertionUrl.absoluteString }) {
+                        router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_list_feed_already_exists".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                    } else {
+                        feedService.createFeed(from: newFeed, rssUrl: itemForInsertionUrl.absoluteString)
+                    }
                 } else {
-                    var newFeedUrls = feedUrls
-                    newFeedUrls.append(itemForInsertionUrl.absoluteString)
-                    userDefaultsService.setFeedUrls(newFeedUrls)
+                    router.presentAlert(
+                        alertViewModel: AlertViewModel(
+                            title: "feed_list_feed_adding_failure".localized(),
+                            message: nil,
+                            actions: [AlertActionViewModel(title: "OK", action: nil)]
+                        )
+                    )
                 }
             })
             .map { _ in }
             .eraseToAnyPublisher()
     }
     
+    var handleDeletingFeed: AnyPublisher<Void, Never> {
+        itemForDeletionIdSubject
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(true)
+            })
+            .flatMap { [feedService] itemForDeletionId in
+                feedService.deleteFeed(with: itemForDeletionId)
+                    .receive(on: DispatchQueue.main)
+                    .catch { [weak self] error in
+                        self?.isLoadingSubject.send(false)
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_list_feed_deleting_failure".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
+                    .ignoreFailure()
+            }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(false)
+            })
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
     private func addFeed(with urlString: String?) {
-        // TODO: - check if this is rss
         if let urlString = urlString, let url = URL(string: urlString)  {
             itemForInsertionUrlSubject.send(url)
         } else {
-            // TODO: - show error wrong url
+            router.presentAlert(
+                alertViewModel: AlertViewModel(
+                    title: "feed_list_feed_fetching_failure".localized(),
+                    message: nil,
+                    actions: [AlertActionViewModel(title: "OK", action: nil)]
+                )
+            )
         }
     }
     
-    private func createFeedCells(from models: [RSSFeed]) -> [FeedListSection] {
+    private func createFeedCells(from models: [FeedModel]) -> [FeedListSection] {
         let emptyCell = FeedListCellType.empty(
             EmptyCellViewModel(
                 id: "emptyCell",
@@ -121,7 +209,7 @@ final class FeedListViewModel: FeedListViewModeling {
         [FeedListSection(section: .standard, items: getCells(from: models))]
     }
     
-    private func getCells(from models: [RSSFeed]) -> [FeedListCellType] {
+    private func getCells(from models: [FeedModel]) -> [FeedListCellType] {
         var dataSource: [FeedListCellType] = []
         let cells = getFeedCells(from: models)
         dataSource.append(contentsOf: cells)
@@ -129,14 +217,14 @@ final class FeedListViewModel: FeedListViewModeling {
         return dataSource
     }
     
-    private func getFeedCells(from models: [RSSFeed]) -> [FeedListCellType] {
+    private func getFeedCells(from models: [FeedModel]) -> [FeedListCellType] {
         models.map { feed in
             .feed(
                 FeedCellViewModel(
-                    id: UUID().uuidString,
+                    id: feed.id,
                     title: feed.title ?? "[-]",
-                    description: feed.description ?? "[-]",
-                    imageUrl: feed.image?.url,
+                    description: feed.feedDescription ?? "[-]",
+                    imageUrl: feed.imageUrl,
                     isFavorited: false
                 )
             )

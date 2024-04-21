@@ -15,10 +15,16 @@ final class AppRootViewController: UINavigationController {
         super.init(nibName: nil, bundle: nil)
         
         startAppFlow()
+        styleView()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func styleView() {
+        navigationBar.prefersLargeTitles = true
+        navigationBar.tintColor = .black
     }
     
     private func startAppFlow() {
