@@ -40,6 +40,7 @@ final class FeedItemsListViewController: UIViewController {
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.keyboardDismissMode = .onDrag
         tableView.refreshControl = refreshControl
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
         tableView.delegate = self
         
         return tableView
@@ -70,8 +71,8 @@ final class FeedItemsListViewController: UIViewController {
     
     private func styleView() {
         view.backgroundColor = .white
-        navigationItem.title = viewModel.navigationTitle
         navigationItem.rightBarButtonItem = markAsFavoriteNavigationItem
+        extendedLayoutIncludesOpaqueBars = true
     }
     
     private func addSubviews() {
@@ -87,6 +88,7 @@ final class FeedItemsListViewController: UIViewController {
     
     private func observe() {
         viewModel.markAsFavoriteImage
+            .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] markAsFavoriteImage in
                 guard let self else { return }
                 markAsFavoriteNavigationItem.image = markAsFavoriteImage
@@ -94,10 +96,27 @@ final class FeedItemsListViewController: UIViewController {
             .store(in: &cancellables)
 
         viewModel.dataSource
+            .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] dataSource in
                 guard let self else { return }
                 refreshControl.endRefreshing()
                 applySnapshot(sections: dataSource)
+            })
+            .store(in: &cancellables)
+        
+        viewModel.handleFavoriteButtonTap
+            .sink { _ in }
+            .store(in: &cancellables)
+
+        viewModel.handlePullToRefresh
+            .sink { _ in }
+            .store(in: &cancellables)
+        
+        viewModel.navigationTitle
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] navigationTitle in
+                guard let self else { return }
+                navigationItem.title = navigationTitle
             })
             .store(in: &cancellables)
         

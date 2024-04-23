@@ -8,5 +8,5 @@
 import Foundation
 
 struct FeedItemsListContext {
-    
+    let parentFeedId: String
 }

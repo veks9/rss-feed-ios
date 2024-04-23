@@ -35,14 +35,16 @@ final class FeedItemCell: UITableViewCell {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.set(textColor: .black, font: .systemFont(ofSize: 20, weight: .bold))
-        label.numberOfLines = 2
+        label.numberOfLines = 3
+        label.minimumScaleFactor = 0.8
+        label.adjustsFontSizeToFitWidth = true
 
         return label
     }()
     
     private lazy var descriptionLabel: UILabel = {
         let label = UILabel()
-        label.set(textColor: .darkGray, font: .systemFont(ofSize: 14, weight: .regular))
+        label.set(textColor: .gray, font: .systemFont(ofSize: 12, weight: .regular))
         label.numberOfLines = 0
         
         return label
@@ -59,6 +61,11 @@ final class FeedItemCell: UITableViewCell {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        feedImageView.image = Assets.rssPlaceholder.image
+    }
 
     private func styleCell() {
         selectionStyle = .none
@@ -66,23 +73,22 @@ final class FeedItemCell: UITableViewCell {
     }
 
     private func addSubviews() {
-        contentView.addSubview(feedImageView)
         contentView.addSubview(verticalStackContainerView)
         
         verticalStackContainerView.addSubview(verticalStackView)
         
+        verticalStackView.addArrangedSubview(feedImageView)
         verticalStackView.addArrangedSubview(titleLabel)
         verticalStackView.addArrangedSubview(descriptionLabel)
     }
 
     private func setConstraints() {
         feedImageView.snp.remakeConstraints {
-            $0.top.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(200)
         }
         
         verticalStackContainerView.snp.remakeConstraints {
-            $0.top.equalTo(feedImageView.snp.bottom).offset(8)
+            $0.top.equalToSuperview().offset(8)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview().offset(-16)
         }
@@ -97,6 +103,7 @@ final class FeedItemCell: UITableViewCell {
 
 extension FeedItemCell {
     func updateUI(viewModel: FeedItemCellViewModel) {
+        feedImageView.isHidden = viewModel.imageUrl == nil
         feedImageView.setImage(viewModel.imageUrl, placeholder: Assets.rssPlaceholder.image)
         titleLabel.text = viewModel.title
         descriptionLabel.text = viewModel.description

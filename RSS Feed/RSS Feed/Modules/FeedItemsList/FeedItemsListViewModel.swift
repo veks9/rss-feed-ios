@@ -10,9 +10,11 @@ import Combine
 import CombineExt
 
 protocol FeedItemsListViewModeling {
-    var navigationTitle: String { get }
+    var navigationTitle: AnyPublisher<String, Never> { get }
     var markAsFavoriteImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedItemsListSection], Never> { get }
+    var handleFavoriteButtonTap: AnyPublisher<Void, Never> { get }
+    var handlePullToRefresh: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onMarkAsFavoriteTap()
@@ -24,53 +26,158 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     
     private let context: FeedItemsListContext
     private let router: FeedItemsListRouting
+    private let feedService: FeedServicing
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
-    private let refreshSubject = PassthroughSubject<Void, Never>()
-    private lazy var isFavoritesIconSelected = CurrentValueSubject<Bool, Never>(false)
+    private let pullToRefreshSubject = PassthroughSubject<Void, Never>()
+    private let favoritesIconSelectedSubject = PassthroughSubject<Void, Never>()
     
     init(
         context: FeedItemsListContext,
-        router: FeedItemsListRouting
+        router: FeedItemsListRouting,
+        feedService: FeedServicing = FeedService.shared
     ) {
         self.context = context
         self.router = router
+        self.feedService = feedService
     }
     
-    var navigationTitle: String {
-        "BBC news"
+    var navigationTitle: AnyPublisher<String, Never> {
+        parentFeed
+            .map {
+                $0.title ?? "[-]"
+            }
+            .eraseToAnyPublisher()
     }
+    
+    lazy var parentFeed: AnyPublisher<FeedModel, Never> = {
+        Publishers.Merge(
+            viewDidLoadSubject,
+            feedService.feedsChanged
+        )
+        .flatMap { [feedService, context] _ in
+            feedService.getFeed(by: context.parentFeedId)
+                .catch({ error in
+                    // TODO: - handle error
+                    return Empty<FeedModel, Never>(completeImmediately: false)
+                })
+                .ignoreFailure()
+        }
+        .share(replay: 1)
+        .eraseToAnyPublisher()
+    }()
     
     var markAsFavoriteImage: AnyPublisher<UIImage?, Never> {
         Publishers.CombineLatest(
             viewDidLoadSubject,
-            isFavoritesIconSelected
+            parentFeed
         )
-        .map { _, isFavoritesIconSelected in
-            isFavoritesIconSelected ? Assets.starFill.systemImage : Assets.star.systemImage
+        .map { _, parentFeed in
+            parentFeed.isFavorited ? Assets.starFill.systemImage : Assets.star.systemImage
         }
         .eraseToAnyPublisher()
     }
     
     lazy var dataSource: AnyPublisher<[FeedItemsListSection], Never> = {
-        Publishers.CombineLatest(
-            viewDidLoadSubject,
-            refreshSubject.prepend(())
-        )
-        .flatMap { _, _ in
-            Just([
-                FeedItemsListSection(
-                    section: .standard,
-                    items: [
-                        .feedItem(FeedItemCellViewModel(id: "0", title: "Dubai airport chaos as Gulf reels from deadly storms", description: "The airport, which serves as a major hub for connecting flights to every continent, warns \"recovery will take some time\".", imageUrl: "https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/18C1/production/_133173360_gettyimages-2147872587.jpg")),
-                        .feedItem(FeedItemCellViewModel(id: "1", title: "Dubai airport chaos as Gulf reels from deadly storms", description: "The airport, which serves as a major hub for connecting flights to every continent, warns \"recovery will take some time\".", imageUrl: "https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/18C1/production/_133173360_gettyimages-2147872587.jpg"))
-                    ]
-                )
-            ])
-        }
-        .share(replay: 1)
-        .eraseToAnyPublisher()
+        viewDidLoadSubject
+            .flatMap({ [parentFeed] _ in
+                parentFeed
+            })
+            .map({ [weak self] parentFeed in
+                guard let self else { return [
+                    FeedItemsListSection(
+                        section: .standard,
+                        items: [
+                            FeedItemsListCellType.empty(
+                                EmptyCellViewModel(
+                                    id: "emptyCell",
+                                    image: nil,
+                                    descriptionText: "feed_items_list_empty_description".localized()
+                                )
+                            )
+                        ]
+                    )
+                ] }
+                let items = parentFeed.items?.allObjects as? [FeedItemModel]
+                return createFeedCells(from: items ?? [])
+            })
+            .share(replay: 1)
+            .eraseToAnyPublisher()
     }()
+    
+    var handleFavoriteButtonTap: AnyPublisher<Void, Never> {
+        favoritesIconSelectedSubject
+            .withLatestFrom(parentFeed)
+            .flatMapLatest({ [feedService] parentFeed in
+                parentFeed.isFavorited.toggle()
+                return feedService.updateFeed(feed: parentFeed)
+                    .catch { error in
+                        // TODO: - handle error
+                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
+                    .ignoreFailure()
+            })
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
+    var handlePullToRefresh: AnyPublisher<Void, Never> {
+        pullToRefreshSubject
+            .flatMapLatest { [feedService, context] _ in
+                feedService.fetchFeed(for: URL(string: context.parentFeedId)!)
+                    .catch({ error in
+                        // TODO: - handle error
+                        print("🔴🔴🔴🔴\(error)🔴🔴🔴🔴")
+                        return Empty<FeedModel, Never>(completeImmediately: false)
+                    })
+                    .ignoreFailure()
+            }
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
+    private func createFeedCells(from models: [FeedItemModel]) -> [FeedItemsListSection] {
+        let emptyCell = FeedItemsListCellType.empty(
+            EmptyCellViewModel(
+                id: "emptyCell",
+                image: nil,
+                descriptionText: "feed_items_list_empty_description".localized()
+            )
+        )
+        return models.isEmpty ?
+        [FeedItemsListSection(section: .standard, items: [emptyCell])] :
+        [FeedItemsListSection(section: .standard, items: getCells(from: models))]
+    }
+    
+    private func getCells(from models: [FeedItemModel]) -> [FeedItemsListCellType] {
+        var dataSource: [FeedItemsListCellType] = []
+        let cells = getFeedItemCells(from: models).sorted { lhs, rhs in
+            switch (lhs, rhs) {
+            case (.feedItem(let lhsViewModel), .feedItem(let rhsViewModel)):
+                return lhsViewModel.datePublished ?? Date() > rhsViewModel.datePublished ?? Date()
+            default:
+                return false
+            }
+        }
+        dataSource.append(contentsOf: cells)
+        
+        return dataSource
+    }
+    
+    private func getFeedItemCells(from models: [FeedItemModel]) -> [FeedItemsListCellType] {
+        models.map { item in
+            .feedItem(
+                FeedItemCellViewModel(
+                    id: item.id ?? UUID().uuidString,
+                    title: item.title ?? "[-]",
+                    description: item.itemDescription,
+                    imageUrl: item.imageUrl,
+                    datePublished: item.datePublished,
+                    link: item.link
+                )
+            )
+        }
+    }
 }
 
 // MARK: - Internal functions
@@ -81,13 +188,24 @@ extension FeedItemsListViewModel {
     }
     
     func onMarkAsFavoriteTap() {
-        isFavoritesIconSelected.send(!isFavoritesIconSelected.value)
+        favoritesIconSelectedSubject.send()
     }
     
     func onRowSelect(with cellViewModel: FeedItemCellViewModel) {
+        if let link = cellViewModel.link, let url = URL(string: link) {
+            router.navigateToArticle(with: url)
+        } else {
+            router.presentAlert(
+                alertViewModel: AlertViewModel(
+                    title: "feed_items_list_broken_article_link_title".localized(),
+                    message: nil,
+                    actions: [AlertActionViewModel(title: "OK", action: nil)]
+                )
+            )
+        }
     }
     
     func onPullToRefresh() {
-        refreshSubject.send()
+        pullToRefreshSubject.send()
     }
 }

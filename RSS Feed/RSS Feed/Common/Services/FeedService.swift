@@ -12,11 +12,12 @@ import FeedKit
 protocol FeedServicing {
     var feedsChanged: AnyPublisher<Void, Never> { get }
     
-    func fetchFeed(for feedUrl: URL) -> Future<RSSFeed?, ParserError>
-    func createFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error>
+    func fetchFeed(for feedUrl: URL) -> AnyPublisher<FeedModel, Error>
+    func createOrUpdateFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error>
     func updateFeed(feed: FeedModel) -> Future<FeedModel, Error>
     func deleteFeed(with feedId: String) -> Future<FeedModel, Error>
     func getAllFeeds() -> Future<[FeedModel], Error>
+    func getFeed(by feedId: String) -> Future<FeedModel, Error>
 }
 
 final class FeedService: FeedServicing {
@@ -38,17 +39,32 @@ final class FeedService: FeedServicing {
         self.persistenceManager = persistenceManager
     }
     
-    func fetchFeed(for feedUrl: URL) -> Future<RSSFeed?, ParserError> {
+    func fetchFeed(for feedUrl: URL) -> AnyPublisher<FeedModel, Error> {
         rssParser.parse(url: feedUrl)
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
+            .mapError { $0 }
+            .flatMap { [self] feed in
+                self.createOrUpdateFeed(from: feed, rssUrl: feedUrl.absoluteString)
+            }
+            .eraseToAnyPublisher()
     }
     
-    func createFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error> {
+    func createOrUpdateFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error> {
         Future<FeedModel, Error> { [weak self] promise in
             guard let self else { return }
             persistenceManager.feedsBackgroundContext.perform { [weak self] in
                 guard let self else { return }
-                let feed = FeedModel(from: model, rssUrl: rssUrl, isFavorited: false)
                 do {
+                    let request = FeedModel.fetchRequest()
+                    request.predicate = NSPredicate(format: "id == %@", rssUrl)
+                    var feed: FeedModel
+                    if let localFeed = try persistenceManager.feedsBackgroundContext.fetch(request).first {
+                        localFeed.update(with: model)
+                        feed = localFeed
+                    } else {
+                        feed = FeedModel(from: model, rssUrl: rssUrl, isFavorited: false)
+                    }
                     try persistenceManager.saveFeedsIfHasChanges()
                     promise(.success(feed))
                 } catch {
@@ -85,7 +101,7 @@ final class FeedService: FeedServicing {
                 let request = FeedModel.fetchRequest()
                 request.predicate = NSPredicate(format: "id == %@", feedId)
                 do {
-                    let objectToDelete = try persistenceManager.feedsBackgroundContext.fetch(request)[safe: 0]
+                    let objectToDelete = try persistenceManager.feedsBackgroundContext.fetch(request).first
                     guard let objectToDelete = objectToDelete else { return }
                     persistenceManager.feedsBackgroundContext.delete(objectToDelete)
                     try persistenceManager.saveFeedsIfHasChanges()
@@ -106,6 +122,23 @@ final class FeedService: FeedServicing {
                     let request = FeedModel.fetchRequest()
                     let feeds = try persistenceManager.feedsBackgroundContext.fetch(request)
                     promise(.success(feeds))
+                } catch {
+                    promise(.failure(error))
+                }
+            }
+        }
+    }
+    
+    func getFeed(by feedId: String) -> Future<FeedModel, Error> {
+        Future<FeedModel, Error> { [weak self] promise in
+            guard let self else { return }
+            persistenceManager.feedsBackgroundContext.perform { [weak self] in
+                guard let self else { return }
+                do {
+                    let request = FeedModel.fetchRequest()
+                    request.predicate = NSPredicate(format: "id == %@", feedId)
+                    guard let feed = try persistenceManager.feedsBackgroundContext.fetch(request).first else { return }
+                    promise(.success(feed))
                 } catch {
                     promise(.failure(error))
                 }

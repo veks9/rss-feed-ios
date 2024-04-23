@@ -36,6 +36,8 @@ final class FeedCell: UITableViewCell {
         let label = UILabel()
         label.set(textColor: .black, font: .systemFont(ofSize: 18, weight: .bold))
         label.numberOfLines = 2
+        label.minimumScaleFactor = 0.8
+        label.adjustsFontSizeToFitWidth = true
 
         return label
     }()
@@ -61,6 +63,11 @@ final class FeedCell: UITableViewCell {
         styleCell()
         addSubviews()
         setConstraints()
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        feedImageView.image = Assets.rssPlaceholder.image
     }
 
     @available(*, unavailable)

@@ -23,7 +23,6 @@ final class AppRootViewController: UINavigationController {
     }
     
     private func styleView() {
-        navigationBar.prefersLargeTitles = true
         navigationBar.tintColor = .black
     }
     

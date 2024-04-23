@@ -46,6 +46,7 @@ final class FeedListViewController: UIViewController {
         tableView.backgroundColor = .white
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.keyboardDismissMode = .onDrag
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
         tableView.delegate = self
         
         return tableView
@@ -118,6 +119,10 @@ final class FeedListViewController: UIViewController {
             .store(in: &cancellables)
          
         viewModel.handleFavoritingFeed
+            .sink { _ in }
+            .store(in: &cancellables)
+        
+        viewModel.handleRowSelect
             .sink { _ in }
             .store(in: &cancellables)
         

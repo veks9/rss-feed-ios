@@ -12,16 +12,22 @@ final class FeedItemCellViewModel {
     let title: String
     let description: String?
     let imageUrl: String?
-
+    let datePublished: Date?
+    let link: String?
+    
     init(
         id: String,
         title: String,
-        description: String,
-        imageUrl: String?
+        description: String?,
+        imageUrl: String?,
+        datePublished: Date?,
+        link: String?
     ) {
         self.id = id
         self.title = title
         self.description = description
         self.imageUrl = imageUrl
+        self.datePublished = datePublished
+        self.link = link
     }
 }

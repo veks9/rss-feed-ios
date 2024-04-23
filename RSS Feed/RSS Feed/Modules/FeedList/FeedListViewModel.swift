@@ -18,6 +18,7 @@ protocol FeedListViewModeling {
     var isLoading: AnyPublisher<Bool, Never> { get }
     var handleDeletingFeed: AnyPublisher<Void, Never> { get }
     var handleFavoritingFeed: AnyPublisher<Void, Never> { get }
+    var handleRowSelect: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
@@ -39,6 +40,7 @@ final class FeedListViewModel: FeedListViewModeling {
     private let itemForInsertionUrlSubject = PassthroughSubject<URL, Never>()
     private let isLoadingSubject = PassthroughSubject<Bool, Never>()
     private let itemForFavoritingIdSubject = PassthroughSubject<String, Never>()
+    private let selectedRowIdSubject = PassthroughSubject<String, Never>()
     
     init(
         router: FeedListRouting,
@@ -93,7 +95,20 @@ final class FeedListViewModel: FeedListViewModeling {
     lazy var dataSource: AnyPublisher<[FeedListSection], Never> = {
         models
             .map { [weak self] models in
-                guard let self else { return [] }
+                guard let self else { return [
+                    FeedListSection(
+                        section: .standard,
+                        items: [
+                            FeedListCellType.empty(
+                                EmptyCellViewModel(
+                                    id: "emptyCell",
+                                    image: Assets.plus.systemImage,
+                                    descriptionText: "feed_list_empty_description".localized()
+                                )
+                            )
+                        ]
+                    )
+                ] }
                 return createFeedCells(from: models)
             }
             .handleEvents(receiveOutput: { [weak self] _ in
@@ -120,37 +135,9 @@ final class FeedListViewModel: FeedListViewModeling {
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
                         )
-                        return Empty<RSSFeed?, Never>(completeImmediately: false).eraseToAnyPublisher()
+                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
                     }
                     .ignoreFailure()
-                    .map { ($0, itemForInsertionUrl) }
-            })
-            .withLatestFrom(models) { ($0.0, $0.1, $1) }
-            .receive(on: DispatchQueue.main)
-            .handleEvents(receiveOutput: { [weak self] newFeed, itemForInsertionUrl, feeds in
-                guard let self else { return }
-                isLoadingSubject.send(false)
-                if let newFeed = newFeed {
-                    if feeds.contains(where: { $0.rssUrl == itemForInsertionUrl.absoluteString }) {
-                        router.presentAlert(
-                            alertViewModel: AlertViewModel(
-                                title: "feed_list_feed_already_exists".localized(),
-                                message: nil,
-                                actions: [AlertActionViewModel(title: "OK", action: nil)]
-                            )
-                        )
-                    } else {
-                        feedService.createFeed(from: newFeed, rssUrl: itemForInsertionUrl.absoluteString)
-                    }
-                } else {
-                    router.presentAlert(
-                        alertViewModel: AlertViewModel(
-                            title: "feed_list_feed_adding_failure".localized(),
-                            message: nil,
-                            actions: [AlertActionViewModel(title: "OK", action: nil)]
-                        )
-                    )
-                }
             })
             .map { _ in }
             .eraseToAnyPublisher()
@@ -203,6 +190,19 @@ final class FeedListViewModel: FeedListViewModeling {
                         return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
                     }
                     .ignoreFailure()
+            })
+            .map { _ in }
+            .eraseToAnyPublisher()
+    }
+    
+    var handleRowSelect: AnyPublisher<Void, Never> {
+        selectedRowIdSubject
+            .withLatestFrom(models) { ($0, $1) }
+            .handleEvents(receiveOutput: { [weak self] selectedRowId, models in
+                guard let self else { return }
+                if let model = models.first(where: { $0.id == selectedRowId }) {
+                    router.navigateToFeedItemsList(context: FeedItemsListContext(parentFeedId: model.id))
+                }
             })
             .map { _ in }
             .eraseToAnyPublisher()
@@ -266,7 +266,7 @@ extension FeedListViewModel {
     }
     
     func onRowSelect(with cellViewModel: FeedCellViewModel) {
-        router.navigateToFeedItemsList(context: FeedItemsListContext())
+        selectedRowIdSubject.send(cellViewModel.id)
     }
     
     func onAddFeedTap() {
