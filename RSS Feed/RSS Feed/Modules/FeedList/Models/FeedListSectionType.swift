@@ -9,6 +9,8 @@ import Foundation
 
 enum FeedListSectionType {
     case standard
+    case favorited
+    case feeds
 }
 
 extension FeedListSectionType: Hashable {
@@ -16,6 +18,10 @@ extension FeedListSectionType: Hashable {
         switch self {
         case .standard:
             hasher.combine("standard")
+        case .favorited:
+            hasher.combine("favorited")
+        case .feeds:
+            hasher.combine("feeds")
         }
     }
 
@@ -23,6 +29,12 @@ extension FeedListSectionType: Hashable {
         switch (lhs, rhs) {
         case (.standard, .standard):
             return true
+        case (.favorited, .favorited):
+            return true
+        case (.feeds, .feeds):
+            return true
+        default:
+            return false
         }
     }
 }

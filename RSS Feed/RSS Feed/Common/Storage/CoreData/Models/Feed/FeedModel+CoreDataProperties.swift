@@ -2,7 +2,7 @@
 //  FeedModel+CoreDataProperties.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 21.04.2024..
+//  Created by Vedran Hernaus on 24.04.2024..
 //
 //
 
@@ -17,14 +17,20 @@ extension FeedModel {
     }
 
     @NSManaged public var feedDescription: String?
-    @NSManaged public var id: String
+    @NSManaged public var id: String?
     @NSManaged public var imageUrl: String?
     @NSManaged public var isFavorited: Bool
-    @NSManaged public var rssUrl: String
+    @NSManaged public var rssUrl: String?
     @NSManaged public var title: String?
-    @NSManaged public var updatedAt: Date
+    @NSManaged public var updatedAt: Date?
     @NSManaged public var items: NSSet?
 
+    public var itemsArray: [FeedItemModel] {
+        let set = items as? Set<FeedItemModel> ?? []
+        return set.sorted {
+            $0.datePublished ?? Date() > $1.datePublished ?? Date()
+        }
+    }
 }
 
 // MARK: Generated accessors for items

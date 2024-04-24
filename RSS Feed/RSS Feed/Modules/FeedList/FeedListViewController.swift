@@ -22,13 +22,6 @@ final class FeedListViewController: UIViewController {
     
     // MARK: - Views
     
-    private let addFeedNavigationItem = UIBarButtonItem(
-        image: Assets.plus.systemImage,
-        style: .plain,
-        target: FeedListViewController.self,
-        action: nil
-    )
-    
     private lazy var loadingSpinnerView: UIActivityIndicatorView = {
         let view = UIActivityIndicatorView()
         view.hidesWhenStopped = true
@@ -38,8 +31,15 @@ final class FeedListViewController: UIViewController {
     
     private lazy var loadingSpinnerNavigationItem = UIBarButtonItem(customView: loadingSpinnerView)
     
+    private let addFeedNavigationItem = UIBarButtonItem(
+        image: Assets.plus.systemImage,
+        style: .plain,
+        target: FeedListViewController.self,
+        action: nil
+    )
+    
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.register(FeedCell.self, forCellReuseIdentifier: FeedCell.identity)
         tableView.register(EmptyCell.self, forCellReuseIdentifier: EmptyCell.identity)
         tableView.separatorStyle = .singleLine
@@ -115,10 +115,6 @@ final class FeedListViewController: UIViewController {
             .store(in: &cancellables)        
         
         viewModel.handleDeletingFeed
-            .sink { _ in }
-            .store(in: &cancellables)
-         
-        viewModel.handleFavoritingFeed
             .sink { _ in }
             .store(in: &cancellables)
         
@@ -208,19 +204,39 @@ extension FeedListViewController: UITableViewDelegate {
             deleteAction.backgroundColor = .red
             deleteAction.image = Assets.trash.systemImage?.withTintColor(.white)
             
-            let favoriteAction = UIContextualAction(style: .normal, title: nil) { [weak self] action, view, handler in
-                self?.viewModel.onMarkFeedFavorite(with: cellViewModel)
-                handler(true)
-            }
-            favoriteAction.backgroundColor = cellViewModel.isFavorited ? .systemIndigo : .lightGray
-            favoriteAction.image = (cellViewModel.isFavorited ? Assets.starFill.systemImage : Assets.star.systemImage)?.withTintColor(.white)
-            
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction, favoriteAction])
+            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
             configuration.performsFirstActionWithFullSwipe = true
             
             return configuration
         default:
             return nil
         }
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let containerView = UIView()
+        
+        let label = UILabel()
+        label.set(textColor: .black, font: .systemFont(ofSize: 20, weight: .bold))
+        
+        containerView.addSubview(label)
+        
+        label.snp.remakeConstraints {
+            $0.verticalEdges.equalToSuperview().inset(4)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+        }
+        
+        switch dataSource.sectionIdentifier(for: section) {
+        case .standard:
+            label.text = nil
+        case .favorited:
+            label.text = "Favorites"
+        case .feeds:
+            label.text = "Feeds"
+        default:
+            label.text = nil
+        }
+        
+        return containerView
     }
 }

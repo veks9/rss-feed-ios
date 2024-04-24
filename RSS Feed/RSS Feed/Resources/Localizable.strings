@@ -9,6 +9,7 @@
 // MARK: - Feed List
 "feed_list_navigation_title" = "Feed List";
 "feed_list_empty_description" = "Add a new RSS feed using plus button in upper right corner";
+"feed_list_empty_favorites_description" = "No favorited feeds";
 "feed_list_add_new_feed_title" = "Add new feed";
 "feed_list_add_new_feed_placeholder" = "Feed URL";
 "feed_list_add_new_feed_submit_button_title" = "Submit";

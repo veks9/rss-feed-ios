@@ -2,7 +2,7 @@
 //  FeedModel+CoreDataClass.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 21.04.2024..
+//  Created by Vedran Hernaus on 24.04.2024..
 //
 //
 
@@ -44,7 +44,7 @@ public class FeedModel: NSManagedObject {
         self.feedDescription = model.description
         self.imageUrl = model.image?.url
         self.updatedAt = Date()
-        self.items = NSSet(array: model.items?.map { FeedItemModel(from: $0) } ?? [])
+        self.addToItems(NSSet(array: model.items?.map { FeedItemModel(from: $0, parentFeed: self) } ?? []))
         self.isFavorited = isFavorited
     }
     
@@ -55,7 +55,7 @@ public class FeedModel: NSManagedObject {
         self.feedDescription = model.feedDescription
         self.imageUrl = model.imageUrl
         self.updatedAt = model.updatedAt
-        self.items = model.items
+        self.addToItems(model.items ?? NSSet())
         self.isFavorited = model.isFavorited
     }
     
@@ -64,7 +64,7 @@ public class FeedModel: NSManagedObject {
         self.feedDescription = model.description
         self.imageUrl = model.image?.url
         self.updatedAt = Date()
-        self.items = NSSet(array: model.items?.map { FeedItemModel(from: $0) } ?? [])
+        self.addToItems(NSSet(array: model.items?.map { FeedItemModel(from: $0, parentFeed: self) } ?? []))
         self.isFavorited = isFavorited
     }
 }

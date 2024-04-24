@@ -103,6 +103,11 @@ final class FeedService: FeedServicing {
                 do {
                     let objectToDelete = try persistenceManager.feedsBackgroundContext.fetch(request).first
                     guard let objectToDelete = objectToDelete else { return }
+                    objectToDelete.items?.allObjects
+                        .forEach { object in
+                            guard let item = object as? FeedItemModel else { return }
+                            self.persistenceManager.feedsBackgroundContext.delete(item)
+                        }
                     persistenceManager.feedsBackgroundContext.delete(objectToDelete)
                     try persistenceManager.saveFeedsIfHasChanges()
                     promise(.success(objectToDelete))

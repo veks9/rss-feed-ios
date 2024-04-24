@@ -98,8 +98,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
                         ]
                     )
                 ] }
-                let items = parentFeed.items?.allObjects as? [FeedItemModel]
-                return createFeedCells(from: items ?? [])
+                return createFeedCells(from: parentFeed.itemsArray)
             })
             .share(replay: 1)
             .eraseToAnyPublisher()
@@ -151,15 +150,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     
     private func getCells(from models: [FeedItemModel]) -> [FeedItemsListCellType] {
         var dataSource: [FeedItemsListCellType] = []
-        let cells = getFeedItemCells(from: models).sorted { lhs, rhs in
-            switch (lhs, rhs) {
-            case (.feedItem(let lhsViewModel), .feedItem(let rhsViewModel)):
-                return lhsViewModel.datePublished ?? Date() > rhsViewModel.datePublished ?? Date()
-            default:
-                return false
-            }
-        }
-        dataSource.append(contentsOf: cells)
+        dataSource.append(contentsOf: getFeedItemCells(from: models))
         
         return dataSource
     }

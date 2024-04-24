@@ -2,7 +2,7 @@
 //  FeedItemModel+CoreDataClass.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 22.04.2024..
+//  Created by Vedran Hernaus on 24.04.2024..
 //
 //
 
@@ -17,7 +17,8 @@ public class FeedItemModel: NSManagedObject {
         itemDescription: String? = nil,
         imageUrl: String? = nil,
         link: String? = nil,
-        datePublished: Date? = nil
+        datePublished: Date? = nil,
+        parentFeed: FeedModel
     ) {
         self.init(context: PersistenceManager.shared.feedsBackgroundContext)
         self.id = id
@@ -26,9 +27,10 @@ public class FeedItemModel: NSManagedObject {
         self.imageUrl = imageUrl
         self.link = link
         self.datePublished = datePublished
+        self.parentFeed = parentFeed
     }
     
-    convenience init(from model: RSSFeedItem) {
+    convenience init(from model: RSSFeedItem, parentFeed: FeedModel) {
         self.init(context: PersistenceManager.shared.feedsBackgroundContext)
         self.id = model.guid?.value ?? UUID().uuidString
         self.title = model.title
@@ -36,5 +38,17 @@ public class FeedItemModel: NSManagedObject {
         self.imageUrl = model.media?.mediaThumbnails?.first?.attributes?.url
         self.link = model.link
         self.datePublished = model.pubDate
+        self.parentFeed = parentFeed
+    }
+    
+    convenience init(from model: FeedItemModel, parentFeed: FeedModel) {
+        self.init(context: PersistenceManager.shared.feedsBackgroundContext)
+        self.id = model.id
+        self.title = model.title
+        self.itemDescription = model.itemDescription
+        self.imageUrl = model.imageUrl
+        self.link = model.link
+        self.datePublished = model.datePublished
+        self.parentFeed = parentFeed
     }
 }

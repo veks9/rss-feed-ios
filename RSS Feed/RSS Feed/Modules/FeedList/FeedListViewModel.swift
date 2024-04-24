@@ -11,22 +11,16 @@ import CombineExt
 import FeedKit
 
 protocol FeedListViewModeling {
-    // TODO: - remove showFavorites image if unused in future
-    var showFavoritesImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedListSection], Never> { get }
     var handleAddingFeed: AnyPublisher<Void, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var handleDeletingFeed: AnyPublisher<Void, Never> { get }
-    var handleFavoritingFeed: AnyPublisher<Void, Never> { get }
     var handleRowSelect: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
     func onAddFeedTap()
-    // TODO: - remove onShowFavoritesTap if unused in future
-    func onShowFavoritesTap()
     func onSwipeToDelete(with cellViewModel: FeedCellViewModel)
-    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel)
 }
 
 final class FeedListViewModel: FeedListViewModeling {
@@ -35,11 +29,9 @@ final class FeedListViewModel: FeedListViewModeling {
     private let feedService: FeedServicing
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
-    private let isFavoritesIconSelected = CurrentValueSubject<Bool, Never>(false)
     private let itemForDeletionIdSubject = PassthroughSubject<String, Never>()
     private let itemForInsertionUrlSubject = PassthroughSubject<URL, Never>()
     private let isLoadingSubject = PassthroughSubject<Bool, Never>()
-    private let itemForFavoritingIdSubject = PassthroughSubject<String, Never>()
     private let selectedRowIdSubject = PassthroughSubject<String, Never>()
     
     init(
@@ -52,17 +44,6 @@ final class FeedListViewModel: FeedListViewModeling {
     
     var isLoading: AnyPublisher<Bool, Never> {
         isLoadingSubject.eraseToAnyPublisher()
-    }
-    
-    var showFavoritesImage: AnyPublisher<UIImage?, Never> {
-        Publishers.CombineLatest(
-            viewDidLoadSubject,
-            isFavoritesIconSelected
-        )
-        .map { _, isFavoritesIconSelected in
-            isFavoritesIconSelected ? Assets.starFill.systemImage : Assets.star.systemImage
-        }
-        .eraseToAnyPublisher()
     }
     
     lazy var models: AnyPublisher<[FeedModel], Never> = {
@@ -109,7 +90,7 @@ final class FeedListViewModel: FeedListViewModeling {
                         ]
                     )
                 ] }
-                return createFeedCells(from: models)
+                return createSections(from: models)
             }
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isLoadingSubject.send(false)
@@ -171,37 +152,13 @@ final class FeedListViewModel: FeedListViewModeling {
             .eraseToAnyPublisher()
     }
     
-    var handleFavoritingFeed: AnyPublisher<Void, Never> {
-        itemForFavoritingIdSubject
-            .withLatestFrom(models) { ($0, $1) }
-            .flatMap({ [weak self] id, models in
-                guard let self, let model = models.first(where: { $0.id == id }) else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
-                model.isFavorited = !model.isFavorited
-                return feedService.updateFeed(feed: model)
-                    .receive(on: DispatchQueue.main)
-                    .catch {[weak self] _ in
-                        self?.router.presentAlert(
-                            alertViewModel: AlertViewModel(
-                                title: "feed_list_feed_favoriting_failure".localized(),
-                                message: nil,
-                                actions: [AlertActionViewModel(title: "OK", action: nil)]
-                            )
-                        )
-                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
-                    }
-                    .ignoreFailure()
-            })
-            .map { _ in }
-            .eraseToAnyPublisher()
-    }
-    
     var handleRowSelect: AnyPublisher<Void, Never> {
         selectedRowIdSubject
             .withLatestFrom(models) { ($0, $1) }
             .handleEvents(receiveOutput: { [weak self] selectedRowId, models in
                 guard let self else { return }
-                if let model = models.first(where: { $0.id == selectedRowId }) {
-                    router.navigateToFeedItemsList(context: FeedItemsListContext(parentFeedId: model.id))
+                if let model = models.first(where: { $0.id == selectedRowId }), let id = model.id {
+                    router.navigateToFeedItemsList(context: FeedItemsListContext(parentFeedId: id))
                 }
             })
             .map { _ in }
@@ -222,7 +179,7 @@ final class FeedListViewModel: FeedListViewModeling {
         }
     }
     
-    private func createFeedCells(from models: [FeedModel]) -> [FeedListSection] {
+    private func createSections(from models: [FeedModel]) -> [FeedListSection] {
         let emptyCell = FeedListCellType.empty(
             EmptyCellViewModel(
                 id: "emptyCell",
@@ -230,24 +187,37 @@ final class FeedListViewModel: FeedListViewModeling {
                 descriptionText: "feed_list_empty_description".localized()
             )
         )
-        return models.isEmpty ?
-        [FeedListSection(section: .standard, items: [emptyCell])] :
-        [FeedListSection(section: .standard, items: getCells(from: models))]
+        
+        let cells = getCells(from: models.filter { !$0.isFavorited })
+        let favoritedCells = getCells(from: models.filter { $0.isFavorited })
+        
+        if models.isEmpty {
+            return [FeedListSection(section: .standard, items: [emptyCell])]
+        } else {
+            var sections = [FeedListSection]()
+            if favoritedCells.isEmpty {
+                sections.append(FeedListSection(section: .standard, items: cells))
+            } else {
+                sections.append(FeedListSection(section: .favorited, items: favoritedCells))
+                cells.isEmpty ? () : sections.append(FeedListSection(section: .feeds, items: cells))
+            }
+
+            return sections
+        }
     }
     
     private func getCells(from models: [FeedModel]) -> [FeedListCellType] {
         var dataSource: [FeedListCellType] = []
-        let cells = getFeedCells(from: models)
-        dataSource.append(contentsOf: cells)
+        dataSource.append(contentsOf: getFeedCells(from: models))
         
         return dataSource
     }
     
     private func getFeedCells(from models: [FeedModel]) -> [FeedListCellType] {
-        models.map { feed in
+        models.compactMap { feed in
             .feed(
                 FeedCellViewModel(
-                    id: feed.id,
+                    id: feed.id ?? UUID().uuidString,
                     title: feed.title ?? "[-]",
                     description: feed.feedDescription ?? "[-]",
                     imageUrl: feed.imageUrl,
@@ -275,15 +245,7 @@ extension FeedListViewModel {
         }
     }
     
-    func onShowFavoritesTap() {
-        isFavoritesIconSelected.send(!isFavoritesIconSelected.value)
-    }
-    
     func onSwipeToDelete(with cellViewModel: FeedCellViewModel) {
         itemForDeletionIdSubject.send(cellViewModel.id)
-    }
-    
-    func onMarkFeedFavorite(with cellViewModel: FeedCellViewModel) {
-        itemForFavoritingIdSubject.send(cellViewModel.id)
     }
 }

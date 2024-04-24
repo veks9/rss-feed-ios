@@ -97,7 +97,7 @@ final class FeedCell: UITableViewCell {
             $0.leading.equalToSuperview().offset(16)
             $0.bottom.lessThanOrEqualToSuperview().offset(-8)
             $0.centerY.equalToSuperview()
-            $0.width.equalTo(100)
+            $0.width.equalTo(80)
             $0.height.equalTo(feedImageView.snp.width).multipliedBy(0.625)
         }
         

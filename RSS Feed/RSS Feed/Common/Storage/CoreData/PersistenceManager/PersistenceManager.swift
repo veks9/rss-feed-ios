@@ -37,7 +37,9 @@ final class PersistenceManager: PersistenceManaging {
 
     lazy var feedsBackgroundContext = persistentContainer.newBackgroundContext()
 
-    private init() {}
+    private init() {
+        feedsBackgroundContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+    }
 
     func saveFeedsIfHasChanges() throws {
         if feedsBackgroundContext.hasChanges {
