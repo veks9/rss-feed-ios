@@ -401,7 +401,6 @@
 			isa = PBXGroup;
 			children = (
 				71A2B9042BD53B460017B375 /* FeedService */,
-				71A2B9022BD53B430017B375 /* FeedService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -409,6 +408,7 @@
 		71A2B9042BD53B460017B375 /* FeedService */ = {
 			isa = PBXGroup;
 			children = (
+				71A2B9022BD53B430017B375 /* FeedService.swift */,
 			);
 			path = FeedService;
 			sourceTree = "<group>";

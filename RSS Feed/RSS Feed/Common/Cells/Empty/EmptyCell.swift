@@ -40,6 +40,8 @@ final class EmptyCell: UITableViewCell {
         return label
     }()
 
+    // MARK: - Lifecycle
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         styleCell()
@@ -51,6 +53,8 @@ final class EmptyCell: UITableViewCell {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Private functions
 
     private func styleCell() {
         selectionStyle = .none
