@@ -230,9 +230,9 @@ extension FeedListViewController: UITableViewDelegate {
         case .standard:
             label.text = nil
         case .favorited:
-            label.text = "Favorites"
+            label.text = "feed_list_favorites_section_title".localized()
         case .feeds:
-            label.text = "Feeds"
+            label.text = "feed_list_feeds_section_title".localized()
         default:
             label.text = nil
         }

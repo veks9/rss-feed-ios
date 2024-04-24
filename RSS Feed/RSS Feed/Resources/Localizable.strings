@@ -20,6 +20,8 @@
 "feed_list_feed_fetching_failure" = "Error while fetching feed. Check given URL";
 "feed_list_feed_deleting_failure" = "Error while deleting feed";
 "feed_list_feed_favoriting_failure" = "Error while favoriting feed";
+"feed_list_feeds_section_title" = "Feeds";
+"feed_list_favorites_section_title" = "Favorites";
 
 // MARK: - Feed Items List
 "feed_items_list_empty_description" = "No articles to show";
