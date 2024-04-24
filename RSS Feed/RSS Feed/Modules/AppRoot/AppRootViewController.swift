@@ -10,6 +10,8 @@ import UIKit
 final class AppRootViewController: UINavigationController {
     private let viewModel: AppRootViewModel
     
+    // MARK: - Lifecycle
+    
     init(viewModel: AppRootViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -21,6 +23,8 @@ final class AppRootViewController: UINavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Private functions
     
     private func styleView() {
         navigationBar.tintColor = .black

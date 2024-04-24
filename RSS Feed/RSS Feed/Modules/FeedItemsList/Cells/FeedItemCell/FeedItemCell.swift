@@ -49,6 +49,8 @@ final class FeedItemCell: UITableViewCell {
         
         return label
     }()
+    
+    // MARK: - Lifecycle
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -66,6 +68,8 @@ final class FeedItemCell: UITableViewCell {
         super.prepareForReuse()
         feedImageView.image = Assets.rssPlaceholder.image
     }
+    
+    // MARK: - Private functions
 
     private func styleCell() {
         selectionStyle = .none

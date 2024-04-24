@@ -103,15 +103,7 @@ final class FeedItemsListViewController: UIViewController {
                 applySnapshot(sections: dataSource)
             })
             .store(in: &cancellables)
-        
-        viewModel.handleFavoriteButtonTap
-            .sink { _ in }
-            .store(in: &cancellables)
-
-        viewModel.handlePullToRefresh
-            .sink { _ in }
-            .store(in: &cancellables)
-        
+       
         viewModel.navigationTitle
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] navigationTitle in

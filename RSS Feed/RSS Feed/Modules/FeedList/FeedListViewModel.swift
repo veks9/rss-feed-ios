@@ -12,10 +12,7 @@ import FeedKit
 
 protocol FeedListViewModeling {
     var dataSource: AnyPublisher<[FeedListSection], Never> { get }
-    var handleAddingFeed: AnyPublisher<Void, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
-    var handleDeletingFeed: AnyPublisher<Void, Never> { get }
-    var handleRowSelect: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onRowSelect(with cellViewModel: FeedCellViewModel)
@@ -27,6 +24,7 @@ final class FeedListViewModel: FeedListViewModeling {
     
     private let router: FeedListRouting
     private let feedService: FeedServicing
+    private var cancellables = Set<AnyCancellable>()
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private let itemForDeletionIdSubject = PassthroughSubject<String, Never>()
@@ -40,7 +38,10 @@ final class FeedListViewModel: FeedListViewModeling {
     ) {
         self.router = router
         self.feedService = feedService
+        
+        observe()
     }
+    // MARK: - Internal properties
     
     var isLoading: AnyPublisher<Bool, Never> {
         isLoadingSubject.eraseToAnyPublisher()
@@ -51,12 +52,13 @@ final class FeedListViewModel: FeedListViewModeling {
             viewDidLoadSubject,
             feedService.feedsChanged.prepend(())
         )
-        .handleEvents(receiveOutput: { [weak self] _ in
-            self?.isLoadingSubject.send(true)
+        .handleEvents(receiveOutput: { [isLoadingSubject] _ in
+            isLoadingSubject.send(true)
         })
             .flatMap { [feedService] _ in
                 feedService.getAllFeeds()
                     .catch { [weak self] _ in
+                        self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
                                 title: "feed_list_feed_fetching_failure".localized(),
@@ -64,7 +66,6 @@ final class FeedListViewModel: FeedListViewModeling {
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
                         )
-                        self?.isLoadingSubject.send(false)
                         return Empty<[FeedModel], Never>(completeImmediately: false).eraseToAnyPublisher()
                     }
                     .ignoreFailure()
@@ -76,33 +77,22 @@ final class FeedListViewModel: FeedListViewModeling {
     lazy var dataSource: AnyPublisher<[FeedListSection], Never> = {
         models
             .map { [weak self] models in
-                guard let self else { return [
-                    FeedListSection(
-                        section: .standard,
-                        items: [
-                            FeedListCellType.empty(
-                                EmptyCellViewModel(
-                                    id: "emptyCell",
-                                    image: Assets.plus.systemImage,
-                                    descriptionText: "feed_list_empty_description".localized()
-                                )
-                            )
-                        ]
-                    )
-                ] }
+                guard let self else { return [] }
                 return createSections(from: models)
             }
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(false)
+            .handleEvents(receiveOutput: { [isLoadingSubject] _ in
+                isLoadingSubject.send(false)
             })
             .share(replay: 1)
             .eraseToAnyPublisher()
     }()
     
-    var handleAddingFeed: AnyPublisher<Void, Never> {
+    // MARK: - Private functions
+    
+    private func observe() {
         itemForInsertionUrlSubject
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(true)
+            .handleEvents(receiveOutput: { [isLoadingSubject] _ in
+                isLoadingSubject.send(true)
             })
             .flatMap({ [feedService] itemForInsertionUrl in
                 feedService.fetchFeed(for: itemForInsertionUrl)
@@ -120,14 +110,12 @@ final class FeedListViewModel: FeedListViewModeling {
                     }
                     .ignoreFailure()
             })
-            .map { _ in }
-            .eraseToAnyPublisher()
-    }
-    
-    var handleDeletingFeed: AnyPublisher<Void, Never> {
+            .sink { _ in }
+            .store(in: &cancellables)
+        
         itemForDeletionIdSubject
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(true)
+            .handleEvents(receiveOutput: { [isLoadingSubject] _ in
+                isLoadingSubject.send(true)
             })
             .flatMap { [feedService] itemForDeletionId in
                 feedService.deleteFeed(with: itemForDeletionId)
@@ -145,24 +133,19 @@ final class FeedListViewModel: FeedListViewModeling {
                     }
                     .ignoreFailure()
             }
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(false)
+            .sink(receiveValue: { [isLoadingSubject] _ in
+                isLoadingSubject.send(false)
             })
-            .map { _ in }
-            .eraseToAnyPublisher()
-    }
-    
-    var handleRowSelect: AnyPublisher<Void, Never> {
+            .store(in: &cancellables)
+        
         selectedRowIdSubject
             .withLatestFrom(models) { ($0, $1) }
-            .handleEvents(receiveOutput: { [weak self] selectedRowId, models in
-                guard let self else { return }
+            .sink(receiveValue: { [router] selectedRowId, models in
                 if let model = models.first(where: { $0.id == selectedRowId }), let id = model.id {
                     router.navigateToFeedItemsList(context: FeedItemsListContext(parentFeedId: id))
                 }
             })
-            .map { _ in }
-            .eraseToAnyPublisher()
+            .store(in: &cancellables)
     }
     
     private func addFeed(with urlString: String?) {
@@ -188,7 +171,7 @@ final class FeedListViewModel: FeedListViewModeling {
             )
         )
         
-        let cells = getCells(from: models.filter { !$0.isFavorited })
+        let standardCells = getCells(from: models.filter { !$0.isFavorited })
         let favoritedCells = getCells(from: models.filter { $0.isFavorited })
         
         if models.isEmpty {
@@ -196,10 +179,10 @@ final class FeedListViewModel: FeedListViewModeling {
         } else {
             var sections = [FeedListSection]()
             if favoritedCells.isEmpty {
-                sections.append(FeedListSection(section: .standard, items: cells))
+                sections.append(FeedListSection(section: .standard, items: standardCells))
             } else {
                 sections.append(FeedListSection(section: .favorited, items: favoritedCells))
-                cells.isEmpty ? () : sections.append(FeedListSection(section: .feeds, items: cells))
+                standardCells.isEmpty ? () : sections.append(FeedListSection(section: .feeds, items: standardCells))
             }
 
             return sections

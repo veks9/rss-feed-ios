@@ -57,6 +57,8 @@ final class FeedCell: UITableViewCell {
         
         return imageView
     }()
+    
+    // MARK: - Lifecycle
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -74,6 +76,8 @@ final class FeedCell: UITableViewCell {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Private functions
 
     private func styleCell() {
         selectionStyle = .none

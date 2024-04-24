@@ -13,8 +13,6 @@ protocol FeedItemsListViewModeling {
     var navigationTitle: AnyPublisher<String, Never> { get }
     var markAsFavoriteImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedItemsListSection], Never> { get }
-    var handleFavoriteButtonTap: AnyPublisher<Void, Never> { get }
-    var handlePullToRefresh: AnyPublisher<Void, Never> { get }
     
     func onViewDidLoad()
     func onMarkAsFavoriteTap()
@@ -27,6 +25,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     private let context: FeedItemsListContext
     private let router: FeedItemsListRouting
     private let feedService: FeedServicing
+    private var cancellables = Set<AnyCancellable>()
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private let pullToRefreshSubject = PassthroughSubject<Void, Never>()
@@ -40,7 +39,11 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
         self.context = context
         self.router = router
         self.feedService = feedService
+        
+        observe()
     }
+    
+    // MARK: - Internal properties
     
     var navigationTitle: AnyPublisher<String, Never> {
         parentFeed
@@ -57,8 +60,14 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
         )
         .flatMap { [feedService, context] _ in
             feedService.getFeed(by: context.parentFeedId)
-                .catch({ error in
-                    // TODO: - handle error
+                .catch({ [weak self] error in
+                    self?.router.presentAlert(
+                        alertViewModel: AlertViewModel(
+                            title: "feed_items_list_fetching_error".localized(),
+                            message: nil,
+                            actions: [AlertActionViewModel(title: "OK", action: nil)]
+                        )
+                    )
                     return Empty<FeedModel, Never>(completeImmediately: false)
                 })
                 .ignoreFailure()
@@ -84,58 +93,56 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
                 parentFeed
             })
             .map({ [weak self] parentFeed in
-                guard let self else { return [
-                    FeedItemsListSection(
-                        section: .standard,
-                        items: [
-                            FeedItemsListCellType.empty(
-                                EmptyCellViewModel(
-                                    id: "emptyCell",
-                                    image: nil,
-                                    descriptionText: "feed_items_list_empty_description".localized()
-                                )
-                            )
-                        ]
-                    )
-                ] }
-                return createFeedCells(from: parentFeed.itemsArray)
+                guard let self else { return [] }
+                return createSections(from: parentFeed.itemsArray)
             })
             .share(replay: 1)
             .eraseToAnyPublisher()
     }()
     
-    var handleFavoriteButtonTap: AnyPublisher<Void, Never> {
+    // MARK: - Private functions
+    
+    private func observe() {
         favoritesIconSelectedSubject
             .withLatestFrom(parentFeed)
             .flatMapLatest({ [feedService] parentFeed in
                 parentFeed.isFavorited.toggle()
                 return feedService.updateFeed(feed: parentFeed)
-                    .catch { error in
-                        // TODO: - handle error
+                    .catch { [weak self] error in
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_items_list_favoriting_error".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
                         return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
                     }
                     .ignoreFailure()
             })
-            .map { _ in }
-            .eraseToAnyPublisher()
-    }
-    
-    var handlePullToRefresh: AnyPublisher<Void, Never> {
+            .sink { _ in }
+            .store(in: &cancellables)
+        
         pullToRefreshSubject
             .flatMapLatest { [feedService, context] _ in
                 feedService.fetchFeed(for: URL(string: context.parentFeedId)!)
-                    .catch({ error in
-                        // TODO: - handle error
-                        print("🔴🔴🔴🔴\(error)🔴🔴🔴🔴")
+                    .catch({ [weak self] error in
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_items_list_fetching_error".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
                         return Empty<FeedModel, Never>(completeImmediately: false)
                     })
                     .ignoreFailure()
             }
-            .map { _ in }
-            .eraseToAnyPublisher()
+            .sink { _ in }
+            .store(in: &cancellables)
     }
     
-    private func createFeedCells(from models: [FeedItemModel]) -> [FeedItemsListSection] {
+    private func createSections(from models: [FeedItemModel]) -> [FeedItemsListSection] {
         let emptyCell = FeedItemsListCellType.empty(
             EmptyCellViewModel(
                 id: "emptyCell",

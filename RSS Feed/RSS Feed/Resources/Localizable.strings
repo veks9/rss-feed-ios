@@ -26,3 +26,5 @@
 // MARK: - Feed Items List
 "feed_items_list_empty_description" = "No articles to show";
 "feed_items_list_broken_article_link_title" = "Broken article link";
+"feed_items_list_fetching_error" = "Error while fetching";
+"feed_items_list_favoriting_error" = "Error while favoriting";

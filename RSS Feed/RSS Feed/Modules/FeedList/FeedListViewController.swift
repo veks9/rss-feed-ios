@@ -110,18 +110,6 @@ final class FeedListViewController: UIViewController {
             })
             .store(in: &cancellables)
         
-        viewModel.handleAddingFeed
-            .sink { _ in }
-            .store(in: &cancellables)        
-        
-        viewModel.handleDeletingFeed
-            .sink { _ in }
-            .store(in: &cancellables)
-        
-        viewModel.handleRowSelect
-            .sink { _ in }
-            .store(in: &cancellables)
-        
         addFeedNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
                 guard let self else { return }
