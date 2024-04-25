@@ -65,6 +65,8 @@
 		71A2B9802BD997880017B375 /* FeedItemModel+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97C2BD997880017B375 /* FeedItemModel+CoreDataProperties.swift */; };
 		71A2B9812BD997880017B375 /* FeedModel+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97D2BD997880017B375 /* FeedModel+CoreDataClass.swift */; };
 		71A2B9822BD997880017B375 /* FeedModel+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97E2BD997880017B375 /* FeedModel+CoreDataProperties.swift */; };
+		71F677742BD9B1CE00BA5755 /* PushNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F677732BD9B1CD00BA5755 /* PushNotificationHandler.swift */; };
+		71F677772BD9C05800BA5755 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F677762BD9C05800BA5755 /* AppConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -123,6 +125,8 @@
 		71A2B97C2BD997880017B375 /* FeedItemModel+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedItemModel+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		71A2B97D2BD997880017B375 /* FeedModel+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataClass.swift"; sourceTree = "<group>"; };
 		71A2B97E2BD997880017B375 /* FeedModel+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		71F677732BD9B1CD00BA5755 /* PushNotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationHandler.swift; sourceTree = "<group>"; };
+		71F677762BD9C05800BA5755 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -261,6 +265,8 @@
 		71A2B8BC2BD17D280017B375 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				71F677752BD9C04B00BA5755 /* AppConstants */,
+				71F677722BD9B1BE00BA5755 /* Notifications */,
 				71A2B87B2BD174FE0017B375 /* Extensions */,
 				71A2B9012BD53B330017B375 /* Services */,
 				71A2B8FD2BD5389C0017B375 /* Storage */,
@@ -458,6 +464,22 @@
 			path = Feed;
 			sourceTree = "<group>";
 		};
+		71F677722BD9B1BE00BA5755 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				71F677732BD9B1CD00BA5755 /* PushNotificationHandler.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		71F677752BD9C04B00BA5755 /* AppConstants */ = {
+			isa = PBXGroup;
+			children = (
+				71F677762BD9C05800BA5755 /* AppConstants.swift */,
+			);
+			path = AppConstants;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -566,6 +588,7 @@
 				71A2B89F2BD174FE0017B375 /* Int+.swift in Sources */,
 				71A2B86F2BD173360017B375 /* AppRootViewModel.swift in Sources */,
 				71A2B8E02BD3DCB50017B375 /* FeedItemsListRouter.swift in Sources */,
+				71F677772BD9C05800BA5755 /* AppConstants.swift in Sources */,
 				71A2B8F62BD416AC0017B375 /* RSSParser.swift in Sources */,
 				71A2B8D42BD180590017B375 /* EmptyCellViewModel.swift in Sources */,
 				71A2B8942BD174FE0017B375 /* DateFormatter+.swift in Sources */,
@@ -583,6 +606,7 @@
 				71A2B8EC2BD3E3410017B375 /* FeedItemsListCellType.swift in Sources */,
 				71A2B8CE2BD17FB30017B375 /* FeedListSection.swift in Sources */,
 				71A2B8982BD174FE0017B375 /* UIView+.swift in Sources */,
+				71F677742BD9B1CE00BA5755 /* PushNotificationHandler.swift in Sources */,
 				71A2B8562BD172A60017B375 /* AppDelegate.swift in Sources */,
 				71A2B9822BD997880017B375 /* FeedModel+CoreDataProperties.swift in Sources */,
 				71A2B97F2BD997880017B375 /* FeedItemModel+CoreDataClass.swift in Sources */,
@@ -743,6 +767,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -770,6 +795,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
