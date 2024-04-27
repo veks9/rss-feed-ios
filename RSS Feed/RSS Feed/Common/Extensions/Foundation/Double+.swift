@@ -1,8 +1,8 @@
 //
 //  Double+.swift
-//  helute
+//  RSS Feed
 //
-//  Created by Vedran Hernaus on 14.03.2024..
+//  Created by Vedran Hernaus on 18.04.2024..
 //
 
 import Foundation

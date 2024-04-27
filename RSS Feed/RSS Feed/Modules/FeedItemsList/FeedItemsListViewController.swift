@@ -1,8 +1,8 @@
 //
-//  FeedListViewController.swift
+//  FeedItemsListViewController.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 18.04.2024..
+//  Created by Vedran Hernaus on 20.04.2024..
 //
 
 import UIKit
@@ -10,42 +10,43 @@ import Combine
 import CombineCocoa
 import SnapKit
 
-final class FeedListViewController: UIViewController {
+final class FeedItemsListViewController: UIViewController {
     
-    private let viewModel: FeedListViewModeling
+    private let viewModel: FeedItemsListViewModeling
     
     private var cancellables = Set<AnyCancellable>()
     
-    typealias DataSource = UITableViewDiffableDataSource<FeedListSectionType, FeedListCellType>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<FeedListSectionType, FeedListCellType>
+    typealias DataSource = UITableViewDiffableDataSource<FeedItemsListSectionType, FeedItemsListCellType>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<FeedItemsListSectionType, FeedItemsListCellType>
     private lazy var dataSource: DataSource = makeDataSource()
     
     // MARK: - Views
     
-    private lazy var loadingSpinnerView: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView()
-        view.hidesWhenStopped = true
-        
-        return view
-    }()
-    
-    private lazy var loadingSpinnerNavigationItem = UIBarButtonItem(customView: loadingSpinnerView)
-    
-    private let addFeedNavigationItem = UIBarButtonItem(
-        image: Assets.plus.systemImage,
+    private let notificationsNavigationItem = UIBarButtonItem(
+        image: nil,
         style: .plain,
-        target: FeedListViewController.self,
+        target: FeedItemsListViewController.self,
         action: nil
     )
     
+    private let markAsFavoriteNavigationItem = UIBarButtonItem(
+        image: nil,
+        style: .plain,
+        target: FeedItemsListViewController.self,
+        action: nil
+    )
+    
+    private let refreshControl = UIRefreshControl()
+    
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .grouped)
-        tableView.register(FeedCell.self, forCellReuseIdentifier: FeedCell.identity)
+        let tableView = UITableView(frame: .zero, style: .plain)
+        tableView.register(FeedItemCell.self, forCellReuseIdentifier: FeedItemCell.identity)
         tableView.register(EmptyCell.self, forCellReuseIdentifier: EmptyCell.identity)
         tableView.separatorStyle = .singleLine
         tableView.backgroundColor = .white
         tableView.contentInsetAdjustmentBehavior = .never
         tableView.keyboardDismissMode = .onDrag
+        tableView.refreshControl = refreshControl
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
         tableView.delegate = self
         
@@ -54,7 +55,7 @@ final class FeedListViewController: UIViewController {
     
     // MARK: - Lifecycle
     
-    init(viewModel: FeedListViewModeling) {
+    init(viewModel: FeedItemsListViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -77,9 +78,8 @@ final class FeedListViewController: UIViewController {
     
     private func styleView() {
         view.backgroundColor = .white
-        navigationItem.title = "feed_list_navigation_title".localized()
-        navigationItem.leftBarButtonItem = loadingSpinnerNavigationItem
-        navigationItem.rightBarButtonItem = addFeedNavigationItem
+        navigationItem.rightBarButtonItems = [notificationsNavigationItem, markAsFavoriteNavigationItem]
+        extendedLayoutIncludesOpaqueBars = true
     }
     
     private func addSubviews() {
@@ -94,26 +94,57 @@ final class FeedListViewController: UIViewController {
     }
     
     private func observe() {
-        viewModel.isLoading
+        viewModel.notificationsImage
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] isLoading in
+            .sink(receiveValue: { [weak self] notificationsImage in
                 guard let self else { return }
-                isLoading ? loadingSpinnerView.startAnimating() : loadingSpinnerView.stopAnimating()
+                notificationsNavigationItem.image = notificationsImage
             })
             .store(in: &cancellables)
         
+        viewModel.markAsFavoriteImage
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] markAsFavoriteImage in
+                guard let self else { return }
+                markAsFavoriteNavigationItem.image = markAsFavoriteImage
+            })
+            .store(in: &cancellables)
+
         viewModel.dataSource
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] dataSource in
                 guard let self else { return }
+                refreshControl.endRefreshing()
                 applySnapshot(sections: dataSource)
             })
             .store(in: &cancellables)
+       
+        viewModel.navigationTitle
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] navigationTitle in
+                guard let self else { return }
+                navigationItem.title = navigationTitle
+            })
+            .store(in: &cancellables)
         
-        addFeedNavigationItem.tapPublisher
+        refreshControl.isRefreshingPublisher
+            .sink(receiveValue: { [weak self] isRefreshing in
+                guard let self, isRefreshing else { return }
+                viewModel.onPullToRefresh()
+            })
+            .store(in: &cancellables)
+        
+        notificationsNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
                 guard let self else { return }
-                viewModel.onAddFeedTap()
+                viewModel.onNotificationsIconTap()
+            })
+            .store(in: &cancellables)
+        
+        markAsFavoriteNavigationItem.tapPublisher
+            .sink(receiveValue: { [weak self] _ in
+                guard let self else { return }
+                viewModel.onMarkAsFavoriteIconTap()
             })
             .store(in: &cancellables)
     }
@@ -123,8 +154,8 @@ final class FeedListViewController: UIViewController {
             tableView: tableView
         ) { tableView, indexPath, itemIdentifier -> UITableViewCell? in
             switch itemIdentifier {
-            case .feed(let cellViewModel):
-                let cell: FeedCell = tableView.dequeueCellAtIndexPath(indexPath: indexPath)
+            case .feedItem(let cellViewModel):
+                let cell: FeedItemCell = tableView.dequeueCellAtIndexPath(indexPath: indexPath)
                 cell.updateUI(viewModel: cellViewModel)
 
                 return cell
@@ -139,7 +170,7 @@ final class FeedListViewController: UIViewController {
         return dataSource
     }
     
-    private func applySnapshot(sections: [FeedListSection]) {
+    private func applySnapshot(sections: [FeedItemsListSection]) {
         var snapshot = Snapshot()
         snapshot.appendSections(sections.map{ $0.section} )
         sections.forEach { section in
@@ -151,10 +182,10 @@ final class FeedListViewController: UIViewController {
 
 // MARK: - UITableViewDelegate
 
-extension FeedListViewController: UITableViewDelegate {
+extension FeedItemsListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed(let cellViewModel):
+        case .feedItem(let cellViewModel):
             viewModel.onRowSelect(with: cellViewModel)
         default:
             break
@@ -163,7 +194,7 @@ extension FeedListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed:
+        case .feedItem:
             return UITableView.automaticDimension
         case .empty:
             return tableView.frame.height
@@ -174,57 +205,12 @@ extension FeedListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed:
+        case .feedItem:
             return UITableView.automaticDimension
         case .empty:
             return tableView.frame.height
         default:
             return UITableView.automaticDimension
         }
-    }
-    
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        switch dataSource.itemIdentifier(for: indexPath) {
-        case .feed(let cellViewModel):
-            let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] action, view, handler in
-                self?.viewModel.onSwipeToDelete(with: cellViewModel)
-            }
-            deleteAction.backgroundColor = .red
-            deleteAction.image = Assets.trash.systemImage?.withTintColor(.white)
-            
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-            configuration.performsFirstActionWithFullSwipe = true
-            
-            return configuration
-        default:
-            return nil
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let containerView = UIView()
-        
-        let label = UILabel()
-        label.set(textColor: .black, font: .systemFont(ofSize: 20, weight: .bold))
-        
-        containerView.addSubview(label)
-        
-        label.snp.remakeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(4)
-            $0.horizontalEdges.equalToSuperview().inset(16)
-        }
-        
-        switch dataSource.sectionIdentifier(for: section) {
-        case .standard:
-            label.text = nil
-        case .favorited:
-            label.text = "feed_list_favorites_section_title".localized()
-        case .feeds:
-            label.text = "feed_list_feeds_section_title".localized()
-        default:
-            label.text = nil
-        }
-        
-        return containerView
     }
 }

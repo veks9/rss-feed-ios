@@ -10,6 +10,13 @@ import UIKit
 enum Assets: String {
     
     case plus
+    case star
+    case starFill = "star.fill"
+    case chevronRight = "chevron.right"
+    case rssPlaceholder = "rss-placeholder"
+    case trash
+    case bell
+    case bellFill = "bell.fill"
     
     var image: UIImage? {
         UIImage(named: rawValue)

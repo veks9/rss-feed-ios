@@ -5,3 +5,30 @@
   Created by Vedran Hernaus on 18.04.2024..
   
 */
+
+// MARK: - Feed List
+"feed_list_navigation_title" = "Feed List";
+"feed_list_empty_description" = "Add a new RSS feed using plus button in upper right corner";
+"feed_list_empty_favorites_description" = "No favorited feeds";
+"feed_list_add_new_feed_title" = "Add new feed";
+"feed_list_add_new_feed_placeholder" = "Feed URL";
+"feed_list_add_new_feed_submit_button_title" = "Submit";
+"feed_list_add_new_feed_cancel_button_title" = "Cancel";
+"feed_list_cell_delete_action_title" = "Delete";
+"feed_list_feed_already_exists" = "Feed already exists";
+"feed_list_feed_adding_failure" = "Error while adding feed. Check given URL";
+"feed_list_feed_fetching_failure" = "Error while fetching feed. Check given URL";
+"feed_list_feed_deleting_failure" = "Error while deleting feed";
+"feed_list_feed_favoriting_failure" = "Error while favoriting feed";
+"feed_list_feeds_section_title" = "Feeds";
+"feed_list_favorites_section_title" = "Favorites";
+
+// MARK: - Feed Items List
+"feed_items_list_empty_description" = "No articles to show";
+"feed_items_list_broken_article_link_title" = "Broken article link";
+"feed_items_list_fetching_error" = "Error while fetching";
+"feed_items_list_notifications_error" = "Error while changing notifications state";
+"feed_items_list_favoriting_error" = "Error while favoriting";
+
+// MARK: - Notifications
+"notification_new_articles_body" = "New articles available";
