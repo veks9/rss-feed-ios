@@ -58,9 +58,8 @@ extension AppDelegate {
     }
     
     private func submitBackgroundTask() {
-        BGTaskScheduler.shared.getPendingTaskRequests { request in
-            guard request.isEmpty else { return }
-            
+        BGTaskScheduler.shared.getPendingTaskRequests { requests in
+            guard requests.isEmpty else { return }
             let request = BGProcessingTaskRequest(identifier: AppConstants.backgroundTaskId)
             request.requiresNetworkConnectivity = true
             request.requiresExternalPower = false
@@ -77,7 +76,7 @@ extension AppDelegate {
     func handleBackgroundTask(task: BGProcessingTask) {
         feedService.getAllFeeds()
             .map {
-                $0.filter { !$0.isNotificationsEnabled }
+                $0.filter { $0.isNotificationsEnabled }
             }
             .flatMap({ [feedService] feedModels in
                 Publishers.CombineLatestArray(
@@ -101,6 +100,7 @@ extension AppDelegate {
             })
             .store(in: &cancellables)
         task.setTaskCompleted(success: true)
+        submitBackgroundTask()
     }
     
     private func checkForNewChanges(feeds: [FeedModel], fetchedFeeds: [(String, RSSFeed)]) {

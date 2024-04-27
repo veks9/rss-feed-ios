@@ -22,6 +22,13 @@ final class FeedItemsListViewController: UIViewController {
     
     // MARK: - Views
     
+    private let notificationsNavigationItem = UIBarButtonItem(
+        image: nil,
+        style: .plain,
+        target: FeedItemsListViewController.self,
+        action: nil
+    )
+    
     private let markAsFavoriteNavigationItem = UIBarButtonItem(
         image: nil,
         style: .plain,
@@ -71,7 +78,7 @@ final class FeedItemsListViewController: UIViewController {
     
     private func styleView() {
         view.backgroundColor = .white
-        navigationItem.rightBarButtonItem = markAsFavoriteNavigationItem
+        navigationItem.rightBarButtonItems = [notificationsNavigationItem, markAsFavoriteNavigationItem]
         extendedLayoutIncludesOpaqueBars = true
     }
     
@@ -87,6 +94,14 @@ final class FeedItemsListViewController: UIViewController {
     }
     
     private func observe() {
+        viewModel.notificationsImage
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] notificationsImage in
+                guard let self else { return }
+                notificationsNavigationItem.image = notificationsImage
+            })
+            .store(in: &cancellables)
+        
         viewModel.markAsFavoriteImage
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] markAsFavoriteImage in
@@ -119,10 +134,17 @@ final class FeedItemsListViewController: UIViewController {
             })
             .store(in: &cancellables)
         
+        notificationsNavigationItem.tapPublisher
+            .sink(receiveValue: { [weak self] _ in
+                guard let self else { return }
+                viewModel.onNotificationsIconTap()
+            })
+            .store(in: &cancellables)
+        
         markAsFavoriteNavigationItem.tapPublisher
             .sink(receiveValue: { [weak self] _ in
                 guard let self else { return }
-                viewModel.onMarkAsFavoriteTap()
+                viewModel.onMarkAsFavoriteIconTap()
             })
             .store(in: &cancellables)
     }

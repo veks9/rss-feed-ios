@@ -11,11 +11,13 @@ import CombineExt
 
 protocol FeedItemsListViewModeling {
     var navigationTitle: AnyPublisher<String, Never> { get }
+    var notificationsImage: AnyPublisher<UIImage?, Never> { get }
     var markAsFavoriteImage: AnyPublisher<UIImage?, Never> { get }
     var dataSource: AnyPublisher<[FeedItemsListSection], Never> { get }
     
     func onViewDidLoad()
-    func onMarkAsFavoriteTap()
+    func onNotificationsIconTap()
+    func onMarkAsFavoriteIconTap()
     func onRowSelect(with cellViewModel: FeedItemCellViewModel)
     func onPullToRefresh()
 }
@@ -30,6 +32,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private let pullToRefreshSubject = PassthroughSubject<Void, Never>()
     private let favoritesIconSelectedSubject = PassthroughSubject<Void, Never>()
+    private let notificationsIconSelectedSubject = PassthroughSubject<Void, Never>()
     
     init(
         context: FeedItemsListContext,
@@ -76,6 +79,17 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
         .eraseToAnyPublisher()
     }()
     
+    var notificationsImage: AnyPublisher<UIImage?, Never> {
+        Publishers.CombineLatest(
+            viewDidLoadSubject,
+            parentFeed
+        )
+        .map { _, parentFeed in
+            parentFeed.isNotificationsEnabled ? Assets.bellFill.systemImage : Assets.bell.systemImage
+        }
+        .eraseToAnyPublisher()
+    }
+    
     var markAsFavoriteImage: AnyPublisher<UIImage?, Never> {
         Publishers.CombineLatest(
             viewDidLoadSubject,
@@ -103,6 +117,26 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     // MARK: - Private functions
     
     private func observe() {
+        notificationsIconSelectedSubject
+            .withLatestFrom(parentFeed)
+            .flatMapLatest({ [feedService] parentFeed in
+                parentFeed.isNotificationsEnabled.toggle()
+                return feedService.updateFeed(feed: parentFeed)
+                    .catch { [weak self] error in
+                        self?.router.presentAlert(
+                            alertViewModel: AlertViewModel(
+                                title: "feed_items_list_notifications_error".localized(),
+                                message: nil,
+                                actions: [AlertActionViewModel(title: "OK", action: nil)]
+                            )
+                        )
+                        return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher()
+                    }
+                    .ignoreFailure()
+            })
+            .sink { _ in }
+            .store(in: &cancellables)
+        
         favoritesIconSelectedSubject
             .withLatestFrom(parentFeed)
             .flatMapLatest({ [feedService] parentFeed in
@@ -185,7 +219,11 @@ extension FeedItemsListViewModel {
         viewDidLoadSubject.send()
     }
     
-    func onMarkAsFavoriteTap() {
+    func onNotificationsIconTap() {
+        notificationsIconSelectedSubject.send()
+    }
+    
+    func onMarkAsFavoriteIconTap() {
         favoritesIconSelectedSubject.send()
     }
     
