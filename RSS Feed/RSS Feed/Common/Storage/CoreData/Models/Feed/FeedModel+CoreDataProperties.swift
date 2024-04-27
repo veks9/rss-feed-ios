@@ -2,7 +2,7 @@
 //  FeedModel+CoreDataProperties.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 24.04.2024..
+//  Created by Vedran Hernaus on 26.04.2024..
 //
 //
 
@@ -23,12 +23,19 @@ extension FeedModel {
     @NSManaged public var rssUrl: String?
     @NSManaged public var title: String?
     @NSManaged public var updatedAt: Date?
+    @NSManaged public var isNotificationsEnabled: Bool
     @NSManaged public var items: NSSet?
 
     public var itemsArray: [FeedItemModel] {
         let set = items as? Set<FeedItemModel> ?? []
-        return set.sorted {
-            $0.datePublished ?? Date() > $1.datePublished ?? Date()
+        return set.sorted { (firstItem, secondItem) -> Bool in
+            if let firstDate = firstItem.datePublished,
+               let secondDate = secondItem.datePublished,
+               firstDate != secondDate {
+                return firstDate > secondDate
+            } else {
+                return firstItem.title ?? "" < secondItem.title ?? ""
+            }
         }
     }
 }

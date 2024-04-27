@@ -28,3 +28,6 @@
 "feed_items_list_broken_article_link_title" = "Broken article link";
 "feed_items_list_fetching_error" = "Error while fetching";
 "feed_items_list_favoriting_error" = "Error while favoriting";
+
+// MARK: - Notifications
+"notification_new_articles_body" = "New articles available";

@@ -125,7 +125,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
         
         pullToRefreshSubject
             .flatMapLatest { [feedService, context] _ in
-                feedService.fetchFeed(for: URL(string: context.parentFeedId)!)
+                feedService.fetchFeedAndUpdateLocal(for: URL(string: context.parentFeedId)!)
                     .catch({ [weak self] error in
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(

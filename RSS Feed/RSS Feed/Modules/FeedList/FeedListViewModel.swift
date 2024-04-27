@@ -95,7 +95,7 @@ final class FeedListViewModel: FeedListViewModeling {
                 isLoadingSubject.send(true)
             })
             .flatMap({ [feedService] itemForInsertionUrl in
-                feedService.fetchFeed(for: itemForInsertionUrl)
+                feedService.fetchFeedAndUpdateLocal(for: itemForInsertionUrl)
                     .receive(on: DispatchQueue.main)
                     .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)

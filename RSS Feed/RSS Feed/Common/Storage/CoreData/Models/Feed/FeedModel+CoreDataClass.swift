@@ -2,7 +2,7 @@
 //  FeedModel+CoreDataClass.swift
 //  RSS Feed
 //
-//  Created by Vedran Hernaus on 24.04.2024..
+//  Created by Vedran Hernaus on 26.04.2024..
 //
 //
 
@@ -12,30 +12,10 @@ import FeedKit
 
 public class FeedModel: NSManagedObject {
     convenience init(
-        id: String,
-        rssUrl: String,
-        title: String? = nil,
-        feedDescription: String? = nil,
-        imageUrl: String? = nil,
-        updatedAt: Date,
-        items: NSSet? = nil,
-        isFavorited: Bool
-    ) {
-        self.init(context: PersistenceManager.shared.feedsBackgroundContext)
-        self.id = id
-        self.rssUrl = rssUrl
-        self.title = title
-        self.feedDescription = feedDescription
-        self.imageUrl = imageUrl
-        self.updatedAt = updatedAt
-        self.items = items
-        self.isFavorited = isFavorited
-    }
-    
-    convenience init(
         from model: RSSFeed,
         rssUrl: String,
-        isFavorited: Bool
+        isFavorited: Bool = false,
+        isNotificationsEnabled: Bool = false
     ) {
         self.init(context: PersistenceManager.shared.feedsBackgroundContext)
         self.id = rssUrl
@@ -46,6 +26,7 @@ public class FeedModel: NSManagedObject {
         self.updatedAt = Date()
         self.addToItems(NSSet(array: model.items?.map { FeedItemModel(from: $0, parentFeed: self) } ?? []))
         self.isFavorited = isFavorited
+        self.isNotificationsEnabled = isNotificationsEnabled
     }
     
     func update(with model: FeedModel) {
@@ -57,6 +38,7 @@ public class FeedModel: NSManagedObject {
         self.updatedAt = model.updatedAt
         self.addToItems(model.items ?? NSSet())
         self.isFavorited = model.isFavorited
+        self.isNotificationsEnabled = model.isNotificationsEnabled
     }
     
     func update(with model: RSSFeed) {
@@ -66,5 +48,6 @@ public class FeedModel: NSManagedObject {
         self.updatedAt = Date()
         self.addToItems(NSSet(array: model.items?.map { FeedItemModel(from: $0, parentFeed: self) } ?? []))
         self.isFavorited = isFavorited
+        self.isNotificationsEnabled = isNotificationsEnabled
     }
 }

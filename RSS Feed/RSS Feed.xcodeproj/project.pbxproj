@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		716F42E92BDC276300DCD63B /* FeedModel+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716F42E72BDC276300DCD63B /* FeedModel+CoreDataClass.swift */; };
+		716F42EA2BDC276300DCD63B /* FeedModel+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716F42E82BDC276300DCD63B /* FeedModel+CoreDataProperties.swift */; };
 		71A2B8562BD172A60017B375 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B8552BD172A60017B375 /* AppDelegate.swift */; };
 		71A2B85F2BD172A80017B375 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 71A2B85E2BD172A80017B375 /* Assets.xcassets */; };
 		71A2B8622BD172A80017B375 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 71A2B8602BD172A80017B375 /* LaunchScreen.storyboard */; };
@@ -63,13 +65,13 @@
 		71A2B9332BD5920C0017B375 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B9322BD5920C0017B375 /* PersistenceManager.swift */; };
 		71A2B97F2BD997880017B375 /* FeedItemModel+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97B2BD997880017B375 /* FeedItemModel+CoreDataClass.swift */; };
 		71A2B9802BD997880017B375 /* FeedItemModel+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97C2BD997880017B375 /* FeedItemModel+CoreDataProperties.swift */; };
-		71A2B9812BD997880017B375 /* FeedModel+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97D2BD997880017B375 /* FeedModel+CoreDataClass.swift */; };
-		71A2B9822BD997880017B375 /* FeedModel+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A2B97E2BD997880017B375 /* FeedModel+CoreDataProperties.swift */; };
 		71F677742BD9B1CE00BA5755 /* PushNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F677732BD9B1CD00BA5755 /* PushNotificationHandler.swift */; };
 		71F677772BD9C05800BA5755 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F677762BD9C05800BA5755 /* AppConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		716F42E72BDC276300DCD63B /* FeedModel+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataClass.swift"; sourceTree = "<group>"; };
+		716F42E82BDC276300DCD63B /* FeedModel+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		71A2B8522BD172A60017B375 /* RSS Feed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RSS Feed.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		71A2B8552BD172A60017B375 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		71A2B85E2BD172A80017B375 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -123,8 +125,6 @@
 		71A2B9322BD5920C0017B375 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		71A2B97B2BD997880017B375 /* FeedItemModel+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedItemModel+CoreDataClass.swift"; sourceTree = "<group>"; };
 		71A2B97C2BD997880017B375 /* FeedItemModel+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedItemModel+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		71A2B97D2BD997880017B375 /* FeedModel+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataClass.swift"; sourceTree = "<group>"; };
-		71A2B97E2BD997880017B375 /* FeedModel+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedModel+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		71F677732BD9B1CD00BA5755 /* PushNotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationHandler.swift; sourceTree = "<group>"; };
 		71F677762BD9C05800BA5755 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -458,8 +458,8 @@
 		71A2B9612BD5A3F60017B375 /* Feed */ = {
 			isa = PBXGroup;
 			children = (
-				71A2B97D2BD997880017B375 /* FeedModel+CoreDataClass.swift */,
-				71A2B97E2BD997880017B375 /* FeedModel+CoreDataProperties.swift */,
+				716F42E72BDC276300DCD63B /* FeedModel+CoreDataClass.swift */,
+				716F42E82BDC276300DCD63B /* FeedModel+CoreDataProperties.swift */,
 			);
 			path = Feed;
 			sourceTree = "<group>";
@@ -577,8 +577,8 @@
 				71A2B8D22BD180510017B375 /* EmptyCell.swift in Sources */,
 				71A2B8A32BD174FE0017B375 /* Double+.swift in Sources */,
 				71A2B8AD2BD175B00017B375 /* FeedListViewController.swift in Sources */,
-				71A2B9812BD997880017B375 /* FeedModel+CoreDataClass.swift in Sources */,
 				71A2B8A42BD174FE0017B375 /* Optional+.swift in Sources */,
+				716F42E92BDC276300DCD63B /* FeedModel+CoreDataClass.swift in Sources */,
 				71A2B9082BD53C630017B375 /* Publishers+.swift in Sources */,
 				71A2B8E82BD3DE8D0017B375 /* FeedItemCell.swift in Sources */,
 				71A2B8962BD174FE0017B375 /* UIFont+.swift in Sources */,
@@ -608,7 +608,7 @@
 				71A2B8982BD174FE0017B375 /* UIView+.swift in Sources */,
 				71F677742BD9B1CE00BA5755 /* PushNotificationHandler.swift in Sources */,
 				71A2B8562BD172A60017B375 /* AppDelegate.swift in Sources */,
-				71A2B9822BD997880017B375 /* FeedModel+CoreDataProperties.swift in Sources */,
+				716F42EA2BDC276300DCD63B /* FeedModel+CoreDataProperties.swift in Sources */,
 				71A2B97F2BD997880017B375 /* FeedItemModel+CoreDataClass.swift in Sources */,
 				71A2B89B2BD174FE0017B375 /* UITableView+.swift in Sources */,
 				71A2B9302BD591C70017B375 /* CoreDataModel.xcdatamodeld in Sources */,

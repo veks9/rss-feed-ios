@@ -12,7 +12,8 @@ import FeedKit
 protocol FeedServicing {
     var feedsChanged: AnyPublisher<Void, Never> { get }
     
-    func fetchFeed(for feedUrl: URL) -> AnyPublisher<FeedModel, Error>
+    func fetchFeed(for feedUrl: URL) -> AnyPublisher<RSSFeed, Error>
+    func fetchFeedAndUpdateLocal(for feedUrl: URL) -> AnyPublisher<FeedModel, Error>
     func createOrUpdateFeed(from model: RSSFeed, rssUrl: String) -> Future<FeedModel, Error>
     func updateFeed(feed: FeedModel) -> Future<FeedModel, Error>
     func deleteFeed(with feedId: String) -> Future<FeedModel, Error>
@@ -39,13 +40,19 @@ final class FeedService: FeedServicing {
         self.persistenceManager = persistenceManager
     }
     
-    func fetchFeed(for feedUrl: URL) -> AnyPublisher<FeedModel, Error> {
+    func fetchFeed(for feedUrl: URL) -> AnyPublisher<RSSFeed, Error> {
         rssParser.parse(url: feedUrl)
             .compactMap { $0 }
-            .eraseToAnyPublisher()
             .mapError { $0 }
-            .flatMap { [self] feed in
-                self.createOrUpdateFeed(from: feed, rssUrl: feedUrl.absoluteString)
+            .eraseToAnyPublisher()
+    }
+    
+    func fetchFeedAndUpdateLocal(for feedUrl: URL) -> AnyPublisher<FeedModel, Error> {
+        fetchFeed(for: feedUrl)
+            .flatMap { [weak self] feed in
+                guard let self else { return Empty<FeedModel, Error>(completeImmediately: false).eraseToAnyPublisher() }
+                return createOrUpdateFeed(from: feed, rssUrl: feedUrl.absoluteString)
+                    .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
