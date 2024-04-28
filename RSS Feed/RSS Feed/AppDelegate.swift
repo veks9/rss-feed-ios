@@ -63,7 +63,7 @@ extension AppDelegate {
             let request = BGProcessingTaskRequest(identifier: AppConstants.backgroundTaskId)
             request.requiresNetworkConnectivity = true
             request.requiresExternalPower = false
-            request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 5)
+            request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 15)
             
             do {
                 try BGTaskScheduler.shared.submit(request)
