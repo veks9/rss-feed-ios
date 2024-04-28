@@ -4,7 +4,10 @@
 RSS reader. Add your desired RSS feeds using the plus button. Bell icon turns on the notifictions and star icon favorites them. There is pull to refresh functionality for refreshing articles. Tap on article opens a WebView. There is a background task set up to refresh feed items for feeds with notifications enabled, ensuring a minimum window of 15 minutes between each run.
 
 ### How to test a background task?
-After the background task is submitted, set a breakpoint and in lldb debugger execute following command: `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"org.hernaus.RSS-Feed.backgroundTask"]`
+After the background task is submitted, set a breakpoint and in lldb debugger execute following command: 
+
+`e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"org.hernaus.RSS-Feed.backgroundTask"]`
+
 It has to be tested on a real device and make sure you have Background App Refresh setting turned on in system settings.
 
 ### Test RSS URLs
