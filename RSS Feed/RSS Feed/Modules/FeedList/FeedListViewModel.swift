@@ -55,13 +55,14 @@ final class FeedListViewModel: FeedListViewModeling {
         .handleEvents(receiveOutput: { [isLoadingSubject] _ in
             isLoadingSubject.send(true)
         })
-            .flatMap { [feedService] _ in
-                feedService.getAllFeeds()
+            .flatMap { [weak self] _ in
+                guard let self else { return Just<[FeedModel]>([]).eraseToAnyPublisher() }
+                return feedService.getAllFeeds()
                     .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_list_feed_fetching_failure".localized(),
+                                title: Localization.feedListFeedFetchingFailure.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -94,14 +95,15 @@ final class FeedListViewModel: FeedListViewModeling {
             .handleEvents(receiveOutput: { [isLoadingSubject] _ in
                 isLoadingSubject.send(true)
             })
-            .flatMap({ [feedService] itemForInsertionUrl in
-                feedService.fetchFeedAndUpdateLocal(for: itemForInsertionUrl)
+            .flatMap({ [weak self] itemForInsertionUrl in
+                guard let self else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
+                return feedService.fetchFeedAndUpdateLocal(for: itemForInsertionUrl)
                     .receive(on: DispatchQueue.main)
                     .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_list_feed_fetching_failure".localized(),
+                                title: Localization.feedListFeedFetchingFailure.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -117,14 +119,15 @@ final class FeedListViewModel: FeedListViewModeling {
             .handleEvents(receiveOutput: { [isLoadingSubject] _ in
                 isLoadingSubject.send(true)
             })
-            .flatMap { [feedService] itemForDeletionId in
-                feedService.deleteFeed(with: itemForDeletionId)
+            .flatMap { [weak self] itemForDeletionId in
+                guard let self else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
+                return feedService.deleteFeed(with: itemForDeletionId)
                     .receive(on: DispatchQueue.main)
                     .catch { [weak self] _ in
                         self?.isLoadingSubject.send(false)
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_list_feed_deleting_failure".localized(),
+                                title: Localization.feedListFeedDeletingFailure.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -154,7 +157,7 @@ final class FeedListViewModel: FeedListViewModeling {
         } else {
             router.presentAlert(
                 alertViewModel: AlertViewModel(
-                    title: "feed_list_feed_fetching_failure".localized(),
+                    title: Localization.feedListFeedFetchingFailure.localized(),
                     message: nil,
                     actions: [AlertActionViewModel(title: "OK", action: nil)]
                 )
@@ -167,7 +170,7 @@ final class FeedListViewModel: FeedListViewModeling {
             EmptyCellViewModel(
                 id: "emptyCell",
                 image: Assets.plus.systemImage,
-                descriptionText: "feed_list_empty_description".localized()
+                descriptionText: Localization.feedListEmptyDescription.localized()
             )
         )
         

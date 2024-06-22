@@ -19,16 +19,16 @@ final class FeedListRouter: FeedListRouting {
     
     func presentAddNewFeedAlert(onSubmit: @escaping (String?) -> ()) {
         let alertViewController = UIAlertController(
-            title: "feed_list_add_new_feed_title".localized(),
+            title: Localization.feedListAddNewFeedTitle.localized(),
             message: nil,
             preferredStyle: .alert
         )
         alertViewController.addTextField { textField in
-            textField.placeholder = "feed_list_add_new_feed_placeholder".localized()
+            textField.placeholder = Localization.feedListAddNewFeedPlaceholder.localized()
         }
         
         let submitAction = UIAlertAction(
-            title: "feed_list_add_new_feed_submit_button_title".localized(),
+            title: Localization.feedListAddNewFeedSubmitButtonTitle.localized(),
             style: .default
         ) { _ in
             if let textField = alertViewController.textFields?[safe: 0] {
@@ -36,7 +36,7 @@ final class FeedListRouter: FeedListRouting {
             }
         }
         let cancelAction = UIAlertAction(
-            title: "feed_list_add_new_feed_cancel_button_title".localized(),
+            title: Localization.feedListAddNewFeedCancelButtonTitle.localized(),
             style: .cancel
         )
         

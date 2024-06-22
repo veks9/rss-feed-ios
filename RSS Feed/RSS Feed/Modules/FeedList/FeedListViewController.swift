@@ -77,7 +77,7 @@ final class FeedListViewController: UIViewController {
     
     private func styleView() {
         view.backgroundColor = .white
-        navigationItem.title = "feed_list_navigation_title".localized()
+        navigationItem.title = Localization.feedListNavigationTitle.localized()
         navigationItem.leftBarButtonItem = loadingSpinnerNavigationItem
         navigationItem.rightBarButtonItem = addFeedNavigationItem
     }
@@ -218,9 +218,9 @@ extension FeedListViewController: UITableViewDelegate {
         case .standard:
             label.text = nil
         case .favorited:
-            label.text = "feed_list_favorites_section_title".localized()
+            label.text = Localization.feedListFavoritesSectionTitle.localized()
         case .feeds:
-            label.text = "feed_list_feeds_section_title".localized()
+            label.text = Localization.feedListFeedsSectionTitle.localized()
         default:
             label.text = nil
         }

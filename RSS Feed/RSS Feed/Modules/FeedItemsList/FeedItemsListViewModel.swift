@@ -66,7 +66,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
                 .catch({ [weak self] error in
                     self?.router.presentAlert(
                         alertViewModel: AlertViewModel(
-                            title: "feed_items_list_fetching_error".localized(),
+                            title: Localization.feedItemsListFetchingError.localized(),
                             message: nil,
                             actions: [AlertActionViewModel(title: "OK", action: nil)]
                         )
@@ -119,13 +119,14 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
     private func observe() {
         notificationsIconSelectedSubject
             .withLatestFrom(parentFeed)
-            .flatMapLatest({ [feedService] parentFeed in
+            .flatMapLatest({ [weak self] parentFeed in
+                guard let self else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
                 parentFeed.isNotificationsEnabled.toggle()
                 return feedService.updateFeed(feed: parentFeed)
                     .catch { [weak self] error in
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_items_list_notifications_error".localized(),
+                                title: Localization.feedItemsListNotificationsError.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -139,13 +140,14 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
         
         favoritesIconSelectedSubject
             .withLatestFrom(parentFeed)
-            .flatMapLatest({ [feedService] parentFeed in
+            .flatMapLatest({ [weak self] parentFeed in
+                guard let self else { return Empty<FeedModel, Never>(completeImmediately: false).eraseToAnyPublisher() }
                 parentFeed.isFavorited.toggle()
                 return feedService.updateFeed(feed: parentFeed)
                     .catch { [weak self] error in
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_items_list_favoriting_error".localized(),
+                                title: Localization.feedItemsListFavoritingError.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -163,7 +165,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
                     .catch({ [weak self] error in
                         self?.router.presentAlert(
                             alertViewModel: AlertViewModel(
-                                title: "feed_items_list_fetching_error".localized(),
+                                title: Localization.feedItemsListFetchingError.localized(),
                                 message: nil,
                                 actions: [AlertActionViewModel(title: "OK", action: nil)]
                             )
@@ -181,7 +183,7 @@ final class FeedItemsListViewModel: FeedItemsListViewModeling {
             EmptyCellViewModel(
                 id: "emptyCell",
                 image: nil,
-                descriptionText: "feed_items_list_empty_description".localized()
+                descriptionText: Localization.feedItemsListEmptyDescription.localized()
             )
         )
         return models.isEmpty ?
@@ -233,7 +235,7 @@ extension FeedItemsListViewModel {
         } else {
             router.presentAlert(
                 alertViewModel: AlertViewModel(
-                    title: "feed_items_list_broken_article_link_title".localized(),
+                    title: Localization.feedItemsListBrokenArticleLinkTitle.localized(),
                     message: nil,
                     actions: [AlertActionViewModel(title: "OK", action: nil)]
                 )

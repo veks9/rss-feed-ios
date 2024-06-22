@@ -29,6 +29,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UNUserNotificationCenter.current().delegate = pushNotificationHandler
         
+        return true
+    }
+    
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         requestNotificationAuthorization()
         
         return true
@@ -125,7 +129,7 @@ extension AppDelegate {
         
         let content = UNMutableNotificationContent()
         content.title = feed.title ?? ""
-        content.body = "notification_new_articles_body".localized()
+        content.body = Localization.notificationNewArticlesBody.localized()
         content.categoryIdentifier = "alarm"
         content.userInfo = ["id": feed.id ?? ""]
         content.sound = .default
